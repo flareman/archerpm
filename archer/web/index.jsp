@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" import="java.util.*" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -13,6 +13,6 @@
         <title>Index Page</title>
     </head>
     <body>
-        <h1 id="la">Entry page</h1>
+        <h1 id="la"><%= new java.util.Date() %></h1>
     </body>
 </html>
