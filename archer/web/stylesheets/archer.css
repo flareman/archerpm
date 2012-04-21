@@ -7,6 +7,7 @@ body {
     height: 460px;
     background-image: url('../images/archer/shine.png');
     background-repeat: no-repeat;
+    overflow: visible;
 }
 
 #header.columns img {
@@ -20,6 +21,7 @@ body {
 }
 
 #regPrompt {
+    font-weight: bold;
     text-align: center;
 }
 
