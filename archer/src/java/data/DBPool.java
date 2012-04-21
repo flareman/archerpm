@@ -15,7 +15,7 @@ public class DBPool {
     public DBPool(String address, String userID, String password) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            this.pool = setupPool(address, userID, password);
+            this.pool = DBPool.setupPool(address, userID, password);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }

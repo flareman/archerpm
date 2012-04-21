@@ -70,7 +70,11 @@
                     var r = $.parseJSON(data);
                     var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","loginResult");
                     alertbox.hide();
-                    if (r.result === "error") {
+                    if (r == null) {
+                        alertbox.html("Internal Server Error, please try again.");
+                        alertbox.addClass("error");
+                    }
+                    else if (r.result === "error") {
                         alertbox.html(r.message);
                         alertbox.addClass("error");
                     } else {
@@ -79,7 +83,7 @@
                     }
                     $("#loginResult").fadeOut(300, function() {
                         $("#loginResult").replaceWith(alertbox);
-                        alertbox.fadeIn(300);
+                        alertbox.fadeIn(400);
                         if (r.result === "OK") alertbox.delay(2000).fadeOut();
                     });
                     $("#loginButton").removeAttr("disabled");
