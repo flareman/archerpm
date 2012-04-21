@@ -19,6 +19,10 @@ body {
     text-align: center;
 }
 
+#regPrompt {
+    text-align: center;
+}
+
 .shadow {
     -webkit-box-shadow:  0px 0px 5px 5px rgba(0, 0, 0, 0.15) !important;
     -moz-box-shadow:  0px 0px 5px 5px rgba(0, 0, 0, 0.15) !important;

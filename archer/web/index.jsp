@@ -45,6 +45,7 @@
                                 <input id="password" class="input-text" required placeholder="Password" type="password" name="password" />
                                 <input id="loginButton" type="submit" value="Login" class="nice radius blue button full-width"></input>
                             </form>
+                            <a href="#" id="regPrompt"><p class="archer form details"><strong>New User? Click Here</strong></p> </a>
                         </div>
                     </div>
                 </div>
@@ -90,6 +91,30 @@
                   }  
                 });
                 return false;  
+            });
+            $("#regPrompt").click(function() {
+                var regForm = $("<form />").addClass("nice").attr("id","regForm").attr("action","#").attr("method","POST");
+                var msg = $("<p />").addClass("archer").addClass("form").addClass("details").html("Please fill in all fields below:");
+                var usernameF = $("<input />").addClass("input-text").attr("id","userID").attr("placeholder","Username").attr("type","text").attr("name","userID").attr("required","");
+                var passwordF = $("<input />").addClass("input-text").attr("id","password").attr("placeholder","Password").attr("type","password").attr("name","password").attr("required","");
+                var password2F = $("<input />").addClass("input-text").attr("id","password2").attr("placeholder","Confirm Password").attr("type","password").attr("name","password2").attr("required","");
+                var nameF = $("<input />").addClass("input-text").attr("id","name").attr("placeholder","Name").attr("type","text").attr("name","name").attr("required","");
+                var surnameF = $("<input />").addClass("input-text").attr("id","surname").attr("placeholder","Surname").attr("type","text").attr("name","surname").attr("required","");
+                var emailF = $("<input />").addClass("input-text").attr("id","email").attr("placeholder","Email Address").attr("type","text").attr("name","email").attr("required","");
+                var emailF2 = $("<input />").addClass("input-text").attr("id","email2").attr("placeholder","Confirm Email Address").attr("type","text").attr("name","email2").attr("required","");
+                var regButton = $("<input />").addClass("nice radius blue button full-width").attr("id","loginButton").attr("type","submit").attr("value","Register");
+                regForm.append(msg);
+                regForm.append(usernameF).append(passwordF).append(password2F).append(nameF).append(surnameF).append(emailF).append(emailF2).append(regButton);
+                $("#loginForm").fadeOut(400,function(){
+                    $("#regPrompt").fadeOut(300,function(){$("#regPrompt").hide()})
+                    $("#loginForm").replaceWith(regForm);
+                    regForm.fadeIn(300);
+                    $("#userID").focus();
+                    $(window).scrollTop($(document).height());
+                });
+                
+                
+                return false;
             });
         });
     </script>
