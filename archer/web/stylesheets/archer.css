@@ -34,6 +34,11 @@ body {
 #header h1 {
     color: #FFF;
     text-align: center;
+    text-shadow: rgba(0, 0, 0, 0.3) 0px 2px 3px;
 }
 
 .hidden { display: none; }
+
+.alert-box.centertext {
+    text-align: center;
+}

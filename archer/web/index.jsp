@@ -40,6 +40,7 @@
                         <div class="row">
                             <form class="nice" id="loginForm" action="#" method="POST">
                                 <p class="archer form details">Please enter your login info to start:</p>
+                                <div id="loginResult"></div>
                                 <input id="userID" class="input-text" required placeholder="Username" type="text" name="userID" /> 
                                 <input id="password" class="input-text" required placeholder="Password" type="password" name="password" />
                                 <input id="loginButton" type="submit" value="Login" class="nice radius blue button full-width"></input>
@@ -66,17 +67,24 @@
                   url: "login",  
                   data: $(this).serialize(),  
                   success: function(data) {
-                      var r = $.parseJSON(data);
-                      if (r.result === "error") {
-                            $("#loginForm > p.details").after(
-                            $('<div/>', {class: 'alert-box error'}).html(r.message+"<a href=\"\" class=\"close\">&times;</a>"));
-                      } else {
-                            $("#loginForm > p.details").after(
-                            $('<div/>', {class: 'alert-box success'}).html("Logged in nicely! :)<a href=\"\" class=\"close\">&times;</a>"));
-                      }
+                    var r = $.parseJSON(data);
+                    var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","loginResult");
+                    alertbox.hide();
+                    if (r.result === "error") {
+                        alertbox.html(r.message);
+                        alertbox.addClass("error");
+                    } else {
+                        alertbox.html("Logged in nicely! :)");
+                        alertbox.addClass("success");
+                    }
+                    $("#loginResult").fadeOut(300, function() {
+                        $("#loginResult").replaceWith(alertbox);
+                        alertbox.fadeIn(300);
+                        if (r.result === "OK") alertbox.delay(2000).fadeOut();
+                    });
+                    $("#loginButton").removeAttr("disabled");
                   }  
                 });
-                $("#loginButton").removeAttr("disabled");
                 return false;  
             });
         });

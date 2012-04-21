@@ -37,7 +37,7 @@ public class PerformLogin extends HttpServlet {
                 String password = request.getParameter("password");
                 stmt.setString(1, userID);
                 stmt.setString(2, password);
-                ResultSet results = stmt.executeQuery(loginQuery);
+                ResultSet results = stmt.executeQuery();
                 results.next();
                 if (results.getInt(1) == 0)
                     out.println("{\"result\":\"error\",\"message\":\"Your username or password is incorrect. Please, try again.\"}");
