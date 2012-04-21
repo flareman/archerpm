@@ -40,8 +40,8 @@
                         <div class="row">
                             <form class="nice" id="loginForm" action="#" method="POST">
                                 <p class="archer form details">Please enter your login info to start:</p>
-                                <input class="input-text" required placeholder="Username" type="text" name="userid" /> 
-                                <input class="input-text" required placeholder="Password" type="password" name="pass" />
+                                <input id="userID" class="input-text" required placeholder="Username" type="text" name="userID" /> 
+                                <input id="password" class="input-text" required placeholder="Password" type="password" name="password" />
                                 <input id="loginButton" type="submit" value="Login" class="nice radius blue button full-width"></input>
                             </form>
                         </div>
@@ -56,8 +56,29 @@
     
     <script>
         $(function() {
+            $("#userID").focus();
             $("#logo").fadeIn(1000);
             $("#welcome").delay(1000).fadeIn(500);
+            $("#loginForm").submit(function() {
+                $("#loginButton").attr("disabled", "disabled");
+                $.ajax({  
+                  type: "POST",  
+                  url: "login",  
+                  data: $(this).serialize(),  
+                  success: function(data) {
+                      var r = $.parseJSON(data);
+                      if (r.result === "error") {
+                            $("#loginForm > p.details").after(
+                            $('<div/>', {class: 'alert-box error'}).html(r.message+"<a href=\"\" class=\"close\">&times;</a>"));
+                      } else {
+                            $("#loginForm > p.details").after(
+                            $('<div/>', {class: 'alert-box success'}).html("Logged in nicely! :)<a href=\"\" class=\"close\">&times;</a>"));
+                      }
+                  }  
+                });
+                $("#loginButton").removeAttr("disabled");
+                return false;  
+            });
         });
     </script>
 </html>
