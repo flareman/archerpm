@@ -236,16 +236,18 @@
                 $("#unameLabel").fadeOut(200).remove();
                 $("#unameSmallLabel").fadeOut(200).remove();
             });
-            
+            var isValid = false;
             $(pass).focusout(function(){
                 var label = $("<label />").attr("for","newPassword").attr("id","passLabel");
                 var smallLabel = $("<small />").attr("id","passSmallLabel");
                 if($(pass).val().length < 6){
                     label.addClass("red").html("Invalid Password");
                     smallLabel.addClass("error").html("Password must be at least 6 characters");
+                    isValid = false;
                 }
                 else{
                     label.addClass("green").html("Valid Password");
+                    isValid = true;
                 }
                 label.hide();
                 smallLabel.hide();
@@ -258,9 +260,12 @@
             $(pass).focusin(function(){
                 $("#passLabel").fadeOut(200).remove();
                 $("#passSmallLabel").fadeOut(200).remove();
+                $("#pass2Label").fadeOut(200).remove();
+                $("#pass2SmallLabel").fadeOut(200).remove();
             });
             
             $(pass2).focusout(function(){
+                if (isValid == true){
                 var label = $("<label />").attr("for","passcheck").attr("id","pass2Label");
                 var smallLabel = $("<small />").attr("id","pass2SmallLabel");
                 if($(pass2).val() != $(pass).val()){
@@ -276,6 +281,7 @@
                 pass2.after(smallLabel);
                 label.fadeIn(300);
                 smallLabel.fadeIn(300);
+                }
             });
             
             $(pass2).focusin(function(){
