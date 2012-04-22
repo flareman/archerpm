@@ -61,6 +61,15 @@
             $("#userID").focus();
             $("#logo").fadeIn(1000);
             $("#welcome").delay(1000).fadeIn(500);
+            var uname = $("<input />").addClass("input-text").attr("id","newUserID").
+                    attr("placeholder","Username").attr("type","text").attr("name","newUserID").
+                    attr("required","required");
+            var pass = $("<input />").addClass("input-text").attr("id","newPassword").
+                    attr("placeholder","Password").attr("type","password").
+                    attr("name","newPassword").attr("required","required");
+            var pass2 = $("<input />").addClass("input-text").attr("id","passcheck").
+                    attr("placeholder","Confirm Password").attr("type","password").
+                    attr("name","passcheck").attr("required","");
             $("#loginForm").submit(function() {
                 $("#loginButton").attr("disabled", "disabled");
                 $.ajax({  
@@ -106,15 +115,15 @@
                 var msg = $("<p />").addClass("archer details").
                     html("Great! Please tell us a bit about yourself:");
                 var regresult = $("<div/>").attr("id","registerResult");
-                var uname = $("<input />").addClass("input-text").attr("id","newUserID").
-                    attr("placeholder","Username").attr("type","text").attr("name","newUserID").
-                    attr("required","required");
-                var pass = $("<input />").addClass("input-text").attr("id","newPassword").
-                    attr("placeholder","Password").attr("type","password").
-                    attr("name","newPassword").attr("required","required");
-                var pass2 = $("<input />").addClass("input-text").attr("id","passcheck").
-                    attr("placeholder","Confirm Password").attr("type","password").
-                    attr("name","passcheck").attr("required","");
+//                var uname = $("<input />").addClass("input-text").attr("id","newUserID").
+//                    attr("placeholder","Username").attr("type","text").attr("name","newUserID").
+//                    attr("required","required");
+//                var pass = $("<input />").addClass("input-text").attr("id","newPassword").
+//                    attr("placeholder","Password").attr("type","password").
+//                    attr("name","newPassword").attr("required","required");
+//                var pass2 = $("<input />").addClass("input-text").attr("id","passcheck").
+//                    attr("placeholder","Confirm Password").attr("type","password").
+//                    attr("name","passcheck").attr("required","");
                 var name = $("<input />").addClass("input-text").attr("id","name").
                     attr("placeholder","Name").attr("type","text").attr("name","name").
                     attr("required","required");
@@ -177,9 +186,104 @@
                     regForm.fadeIn(300);
                     $("html, body").delay(100).animate({scrollTop: $("#regForm").offset().top}, 400);
                 });
-                $("#newUserID").focus();
+                $(uname).focus();});
+                //username field swap check here
+                $(uname).focusout(function(){
+                    $.ajax({  
+                      type: "POST",  
+                      url: "check",  
+                      data: $(this).serialize(),  
+                      success: function(data) {
+                        var r = $.parseJSON(data);
+                        var label = $("<label />").attr("for","newUserID").attr("id","unameLabel");
+                        var smallLabel = $("<small />").attr("id","unameSmallLabel");
+                        if (r.result === "error") {
+                            label.addClass("red").html("Invalid Username");
+                            smallLabel.addClass("error").html(r.message);
+                        } 
+                        else if($(uname).val() === ""){
+                            label.addClass("red").html("Invalid Username");
+                            smallLabel.addClass("error").html("You must provide a username");
+                        }
+                        else {
+                            label.addClass("green").html("Valid Username");
+                           
+                        }
+                        label.hide();
+                        smallLabel.hide();
+                        uname.before(label);
+                        uname.after(smallLabel);
+                        label.fadeIn(300);
+                        smallLabel.fadeIn(300);
+                       
+                      },
+                      error: function(xhr, ajaxOptions, thrownError) {
+                          var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","registerResult");
+                        alertbox.hide();
+                        alertbox.html("Whoops, an error occured :( Please try again in a bit.");
+                        alertbox.addClass("warning");
+                        $("#registerResult").fadeOut(300, function() {
+                            $("#registerResult").replaceWith(alertbox);
+                            alertbox.fadeIn(400);
+                            if (r.result === "OK") alertbox.delay(2000).fadeOut();
+                        });
+                      }
+                   });
                 return false;
             });
+            
+            $(uname).focusin(function(){
+                $("#unameLabel").fadeOut(200).remove();
+                $("#unameSmallLabel").fadeOut(200).remove();
+            });
+            
+            $(pass).focusout(function(){
+                var label = $("<label />").attr("for","newPassword").attr("id","passLabel");
+                var smallLabel = $("<small />").attr("id","passSmallLabel");
+                if($(pass).val().length < 6){
+                    label.addClass("red").html("Invalid Password");
+                    smallLabel.addClass("error").html("Password must be at least 6 characters");
+                }
+                else{
+                    label.addClass("green").html("Valid Password");
+                }
+                label.hide();
+                smallLabel.hide();
+                pass.before(label);
+                pass.after(smallLabel);
+                label.fadeIn(300);
+                smallLabel.fadeIn(300);
+            });
+            
+            $(pass).focusin(function(){
+                $("#passLabel").fadeOut(200).remove();
+                $("#passSmallLabel").fadeOut(200).remove();
+            });
+            
+            $(pass2).focusout(function(){
+                var label = $("<label />").attr("for","passcheck").attr("id","pass2Label");
+                var smallLabel = $("<small />").attr("id","pass2SmallLabel");
+                if($(pass2).val() != $(pass).val()){
+                    label.addClass("red").html("Invalid Password");
+                    smallLabel.addClass("error").html("Password fields do not match");
+                }
+                else{
+                    label.addClass("green").html("Password Confirmed");
+                }
+                label.hide();
+                smallLabel.hide();
+                pass2.before(label);
+                pass2.after(smallLabel);
+                label.fadeIn(300);
+                smallLabel.fadeIn(300);
+            });
+            
+            $(pass2).focusin(function(){
+                $("#pass2Label").fadeOut(200).remove();
+                $("#pass2SmallLabel").fadeOut(200).remove();
+            });
+            
+            
         });
     </script>
 </html>
