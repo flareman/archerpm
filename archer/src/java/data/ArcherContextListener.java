@@ -11,8 +11,6 @@ public class ArcherContextListener implements ServletContextListener{
     @Override
     public void contextInitialized(ServletContextEvent event){
         ServletContext sc = event.getServletContext();
-        HashMap<String, HttpSession> map = new HashMap<String, HttpSession>();
-        sc.setAttribute("sessionMap", map);
     }
     
     @Override

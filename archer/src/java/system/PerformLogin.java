@@ -11,7 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.gson.*;
+import javax.servlet.http.HttpSession;
 
 public class PerformLogin extends HttpServlet {
     private DBManager manager;
@@ -41,7 +41,11 @@ public class PerformLogin extends HttpServlet {
                 results.next();
                 if (results.getInt(1) == 0)
                     out.println("{\"result\":\"error\",\"message\":\"Your username or password is incorrect. Please, try again.\"}");
-                else out.println("{\"result\":\"OK\"}");
+                else {
+                    out.println("{\"result\":\"OK\"}");
+                    HttpSession session = request.getSession();
+                    session.setAttribute("userID",userID);
+                }
             } catch (SQLException SQLe) {
                 log("SQL error when logging in", SQLe);
             } finally {

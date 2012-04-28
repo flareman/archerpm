@@ -5,45 +5,7 @@ var IsValidEmail = function (email){
             }
             
 //Handler for login form submission            
-var SubmitLogin = function (){
-                $("#loginButton").attr("disabled", "disabled");
-                $.ajax({  
-                  type: "POST",  
-                  url: "login",  
-                  data: $(this).serialize(),  
-                  success: function(data) {
-                    var r = $.parseJSON(data);
-                    var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","loginResult");
-                    alertbox.hide();
-                    if (r.result === "error") {
-                        alertbox.html(r.message);
-                        alertbox.addClass("error");
-                    } else {
-                        alertbox.html("Logged in nicely! :)");
-                        alertbox.addClass("success");
-                    }
-                    $("#loginResult").fadeOut(300, function() {
-                        $("#loginResult").replaceWith(alertbox);
-                        alertbox.fadeIn(400);
-                        if (r.result === "OK") alertbox.delay(2000).fadeOut();
-                    });
-                    $("#loginButton").removeAttr("disabled");
-                  },
-                  error: function(xhr, ajaxOptions, thrownError) {
-                    var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","loginResult");
-                    alertbox.hide();
-                    alertbox.html("Whoops, an error occured :( Please try again in a bit.");
-                    alertbox.addClass("warning");
-                    $("#loginResult").fadeOut(300, function() {
-                        $("#loginResult").replaceWith(alertbox);
-                        alertbox.fadeIn(400);
-                        if (r.result === "OK") alertbox.delay(2000).fadeOut();
-                    });
-                    $("#loginButton").removeAttr("disabled");
-                  }
-                });
-                return false;  
-            }
+
 
 //handler for register form submission
 var SubmitRegister = function(){
@@ -88,17 +50,3 @@ var SubmitRegister = function(){
                     });
                     return false;  
                 }
-
-//username focus out event handler for registration form
-
-//username focus in event handler for registration form
-
-
-//password focus out event handler for registration form
-
-            
-
-            
-
-            
-

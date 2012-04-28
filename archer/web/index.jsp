@@ -78,7 +78,46 @@
             var email2 = $("<input />").addClass("input-text").attr("id","email2").
                     attr("placeholder","Confirm Email Address").attr("type","text").
                     attr("name","email2").attr("required","required");
-            $("#loginForm").submit(SubmitLogin);
+            $("#loginForm").submit(function (){
+                $("#loginButton").attr("disabled", "disabled");
+                $.ajax({  
+                  type: "POST",  
+                  url: "login",  
+                  data: $(this).serialize(),  
+                  success: function(data) {
+                    var r = $.parseJSON(data);
+                    var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","loginResult");
+                    alertbox.hide();
+                    if (r.result === "error") {
+                        alertbox.html(r.message);
+                        alertbox.addClass("error");
+                    } else {
+                        alertbox.html("Logged in nicely! :)");
+                        alertbox.addClass("success");
+                        window.location.replace("<%=response.encodeRedirectURL("dashboard.jsp")%>");
+                    }
+                    $("#loginResult").fadeOut(300, function() {
+                        $("#loginResult").replaceWith(alertbox);
+                        alertbox.fadeIn(400);
+                        if (r.result === "OK") alertbox.delay(2000).fadeOut();
+                    });
+                    $("#loginButton").removeAttr("disabled");
+                  },
+                  error: function(xhr, ajaxOptions, thrownError) {
+                    var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","loginResult");
+                    alertbox.hide();
+                    alertbox.html("Whoops, an error occured :( Please try again in a bit.");
+                    alertbox.addClass("warning");
+                    $("#loginResult").fadeOut(300, function() {
+                        $("#loginResult").replaceWith(alertbox);
+                        alertbox.fadeIn(400);
+                        if (r.result === "OK") alertbox.delay(2000).fadeOut();
+                    });
+                    $("#loginButton").removeAttr("disabled");
+                  }
+                });
+                return false;  
+            });
             $("#regPrompt").click(function() {
                 var regForm = $("<form />").addClass("nice").attr("id","regForm").
                     attr("action","#").attr("method","POST");
