@@ -90,46 +90,15 @@ var SubmitRegister = function(){
                 }
 
 //username focus out event handler for registration form
-var UnameFocusOut = function(){
-                    $.ajax({  
-                      type: "POST",  
-                      url: "check",  
-                      data: $(this).serialize(),  
-                      success: function(data) {
-                        var r = $.parseJSON(data);
-                        var label = $("<label />").attr("for","newUserID").attr("id","unameLabel");
-                        var smallLabel = $("<small />").attr("id","unameSmallLabel");
-                        if (r.result === "error") {
-                            label.addClass("red").html("Invalid Username");
-                            smallLabel.addClass("error").html(r.message);
-                        } 
-                        else if($(uname).val() === ""){
-                            label.addClass("red").html("Invalid Username");
-                            smallLabel.addClass("error").html("You must provide a username");
-                        }
-                        else {
-                            label.addClass("green").html("Valid Username");
-                           
-                        }
-                        label.hide();
-                        smallLabel.hide();
-                        uname.before(label);
-                        uname.after(smallLabel);
-                        label.fadeIn(300);
-                        smallLabel.fadeIn(300);
-                       
-                      },
-                      error: function(xhr, ajaxOptions, thrownError) {
-                          var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","registerResult");
-                        alertbox.hide();
-                        alertbox.html("Whoops, an error occured :( Please try again in a bit.");
-                        alertbox.addClass("warning");
-                        $("#registerResult").fadeOut(300, function() {
-                            $("#registerResult").replaceWith(alertbox);
-                            alertbox.fadeIn(400);
-                            if (r.result === "OK") alertbox.delay(2000).fadeOut();
-                        });
-                      }
-                   });
-                return false;
-            }
+
+//username focus in event handler for registration form
+
+
+//password focus out event handler for registration form
+
+            
+
+            
+
+            
+
