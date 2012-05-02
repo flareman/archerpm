@@ -6,6 +6,6 @@
         <title>Dashboard</title>
     </head>
     <body>
-        <h1>Welcome, <%=request.getSession().getAttribute("userID")%></h1>
+        <h1>Welcome, <%=request.getSession().getAttribute("userID") %></h1>
     </body>
 </html>
