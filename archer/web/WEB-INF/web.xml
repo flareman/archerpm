@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    <filter>
+        <filter-name>Gatekeeper</filter-name>
+        <filter-class>system.Gatekeeper</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>Gatekeeper</filter-name>
+        <url-pattern>/index.jsp</url-pattern>
+        <url-pattern>/dashboard</url-pattern>
+        <url-pattern>/dashboard/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
+    </filter-mapping>
     <servlet>
         <servlet-name>PerformLogin</servlet-name>
         <servlet-class>system.PerformLogin</servlet-class>
@@ -11,6 +25,10 @@
     <servlet>
         <servlet-name>PerformRegistration</servlet-name>
         <servlet-class>system.PerformRegistration</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DashboardMain</servlet-name>
+        <jsp-file>/dashboard.jsp</jsp-file>
     </servlet>
     <servlet-mapping>
         <servlet-name>PerformLogin</servlet-name>
@@ -24,9 +42,25 @@
         <servlet-name>PerformRegistration</servlet-name>
         <url-pattern>/register</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DashboardMain</servlet-name>
+        <url-pattern>/dashboard</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>
             30
         </session-timeout>
     </session-config>
+    <security-constraint>
+        <display-name>SSL</display-name>
+        <web-resource-collection>
+            <web-resource-name>AllPages</web-resource-name>
+            <description/>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <user-data-constraint>
+            <description/>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
 </web-app>

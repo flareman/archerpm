@@ -20,16 +20,13 @@ $(function() {
             if (r.result === "error") {
                 alertbox.html(r.message);
                 alertbox.addClass("error");
-            } else {
-                alertbox.html("Logged in nicely! :)");
-                alertbox.addClass("success");
             }
             $("#loginResult").fadeOut(300, function() {
-                $("#loginResult").replaceWith(alertbox);
-                alertbox.fadeIn(400);
-                if (r.result === "OK") alertbox.delay(2000).fadeOut(function(){
-                    window.location.replace("<%= response.encodeURL("dashboard.jsp") %>");
-                });
+                if (r.result === "OK") window.location.replace("<%= response.encodeURL("dashboard") %>");
+                else {
+                    $("#loginResult").replaceWith(alertbox);
+                    alertbox.fadeIn(400);
+                }
             });
             $("#loginButton").removeAttr("disabled");
           },
@@ -209,10 +206,12 @@ $(function() {
             }
             label.hide();
             smallLabel.hide();
-            email.before(label);
-            email.after(smallLabel);
-            label.fadeIn(300);
-            smallLabel.fadeIn(300);
+            if (!($(email).val() === "")) {
+                email.before(label);
+                email.after(smallLabel);
+                label.fadeIn(300);
+                smallLabel.fadeIn(300);
+            }
         });
 
         $(email).focusin(function(){
@@ -220,6 +219,7 @@ $(function() {
             $("#emailSmallLabel").fadeOut(200).remove();
             $("#email2Label").fadeOut(200).remove();
             $("#email2SmallLabel").fadeOut(200).remove();
+            return true;
         });
 
         $(email2).blur(function(){
