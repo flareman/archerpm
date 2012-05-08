@@ -7,5 +7,6 @@
     </head>
     <body>
         <h1>Welcome, <%=request.getSession().getAttribute("userID") %></h1>
+        <p><a href="<%= response.encodeURL("dashboard/logout") %>">Log out from Archer</a></p>
     </body>
 </html>

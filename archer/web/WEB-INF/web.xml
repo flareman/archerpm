@@ -30,6 +30,11 @@
         <servlet-name>DashboardMain</servlet-name>
         <jsp-file>/dashboard.jsp</jsp-file>
     </servlet>
+    <servlet>
+        <description>Logs out from Archer</description>
+        <servlet-name>PerformLogout</servlet-name>
+        <servlet-class>system.PerformLogout</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>PerformLogin</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -45,6 +50,10 @@
     <servlet-mapping>
         <servlet-name>DashboardMain</servlet-name>
         <url-pattern>/dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PerformLogout</servlet-name>
+        <url-pattern>/dashboard/logout</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

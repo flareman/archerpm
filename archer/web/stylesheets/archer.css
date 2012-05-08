@@ -1,4 +1,5 @@
 body {
+    min-width: 1000px;
     background-image: url('../images/archer/bkg.png');
 }
 

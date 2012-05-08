@@ -39,7 +39,9 @@ public class PerformLogin extends HttpServlet {
                 stmt.setString(2, password);
                 ResultSet results = stmt.executeQuery();
                 results.next();
-                if (results.getInt(1) == 0)
+                if (userID.equals(""))
+                    out.println("{\"result\":\"error\",\"message\":\"Please enter your username and password.\"}");
+                else if (results.getInt(1) == 0)
                     out.println("{\"result\":\"error\",\"message\":\"Your username or password is incorrect. Please, try again.\"}");
                 else {
                     out.println("{\"result\":\"OK\"}");

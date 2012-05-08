@@ -40,28 +40,33 @@ public class PerformRegistration extends HttpServlet {
                 String checkQuery = "SELECT COUNT(*) FROM Users WHERE username = ?";
                 stmt = conn.prepareStatement(checkQuery);
                 String newUserID = request.getParameter("newUserID");
+                String pass = request.getParameter("newPassword");
+                String email = request.getParameter("email");
                 stmt.setString(1, newUserID);
                 ResultSet results = stmt.executeQuery();
                 results.next();
                
-                if(results.getInt(1) != 0){
-                    out.println("{\"result\":\"error\",\"message\":\"Oops!Somebody got your username first, try again with a different one.\"}");
-                }
-                else{
+                if (results.getInt(1) != 0)
+                    out.println("{\"result\":\"error\",\"message\":\"The username you asked for is taken, sorry. Please pick another.\"}");
+                else if (newUserID.equals(""))
+                    out.println("{\"result\":\"error\",\"message\":\"You must provide a username to register.\"}");
+                else if (email.equals(""))
+                    out.println("{\"result\":\"error\",\"message\":\"You must provide a valid e-mail address to register.\"}");
+                else if (pass.length() < 6)
+                    out.println("{\"result\":\"error\",\"message\":\"Your password must be at least 6 characters long.\"}");
+                else {
                     checkQuery = "INSERT INTO Users(username,password,name,surname,email,status) VALUES(?,SHA1(?),?,?,?,?)";
                     stmt = conn.prepareStatement(checkQuery);
                     newUserID = request.getParameter("newUserID");
-                    String pass = request.getParameter("newPassword");
                     String pass2 = request.getParameter("passcheck");
                     if(!(pass.equals(pass2)))
-                        out.println("{\"result\":\"error\",\"message\":\"Oops!Passwords provided do not match.\"}");
+                        out.println("{\"result\":\"error\",\"message\":\"Oops! Passwords provided do not match.\"}");
                     else{
                         String name = request.getParameter("name");
                         String surname = request.getParameter("surname");
-                        String email = request.getParameter("email");
                         String email2 = request.getParameter("email2");
                         if(!(email.equals(email2))){
-                            out.println("{\"result\":\"error\",\"message\":\"Oops!Emails provided do not match.\"}");
+                            out.println("{\"result\":\"error\",\"message\":\"Oops! Emails provided do not match.\"}");
                         }
                         else{
                             stmt.setString(1, newUserID);
