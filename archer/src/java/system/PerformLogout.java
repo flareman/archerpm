@@ -3,6 +3,7 @@ package system;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,8 +19,12 @@ public class PerformLogout extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
         HttpSession session = request.getSession();
-        response.sendRedirect("/archer");
+        Cookie cookie = new Cookie("userID", "");
+        cookie.setMaxAge(0);
+        cookie.setPath("/archer");
+        response.addCookie(cookie);
         session.invalidate();
+        response.sendRedirect("/archer");
         out.close();
     }
 

@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import util.Toolbox;
 
 /**
  *
@@ -55,7 +56,7 @@ public class PerformRegistration extends HttpServlet {
                 else if (pass.length() < 6)
                     out.println("{\"result\":\"error\",\"message\":\"Your password must be at least 6 characters long.\"}");
                 else {
-                    checkQuery = "INSERT INTO Users(username,password,name,surname,email,status) VALUES(?,SHA1(?),?,?,?,?)";
+                    checkQuery = "INSERT INTO Users(username,salt,password,name,surname,email,status) VALUES(?,?,SHA1(CONCAT(?,?)),?,?,?,?)";
                     stmt = conn.prepareStatement(checkQuery);
                     newUserID = request.getParameter("newUserID");
                     String pass2 = request.getParameter("passcheck");
@@ -70,11 +71,14 @@ public class PerformRegistration extends HttpServlet {
                         }
                         else{
                             stmt.setString(1, newUserID);
-                            stmt.setString(2, pass);
-                            stmt.setString(3, name);
-                            stmt.setString(4, surname);
-                            stmt.setString(5, email);
-                            stmt.setString(6, "4");
+                            String salt = Toolbox.randomString(15);
+                            stmt.setString(2, salt);
+                            stmt.setString(3, salt);
+                            stmt.setString(4, pass);
+                            stmt.setString(5, name);
+                            stmt.setString(6, surname);
+                            stmt.setString(7, email);
+                            stmt.setString(8, "4");
                             stmt.executeUpdate();
                             out.println("{\"result\":\"OK\"}");
 

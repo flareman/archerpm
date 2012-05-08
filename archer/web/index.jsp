@@ -44,6 +44,7 @@
                                 <input id="userID" class="input-text" required placeholder="Username" type="text" name="userID" /> 
                                 <input id="password" class="input-text" required placeholder="Password" type="password" name="password" />
                                 <input id="loginButton" type="submit" value="Login" disabled class="nice radius blue button full-width"></input>
+                                <label for="cookie"><input type="checkbox" name="cookie" id="cookie" /> Keep me logged in</label>
                             </form>
                             <a href="#" id="regPrompt"><p class="archer form details">New User? Click Here</p></a>
                         </div>

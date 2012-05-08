@@ -8,10 +8,12 @@ import java.sql.SQLException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import util.Toolbox;
 
 public class PerformLogin extends HttpServlet {
     private DBManager manager;
@@ -30,23 +32,39 @@ public class PerformLogin extends HttpServlet {
             Connection conn = null;
             PreparedStatement stmt = null;
             try {
-                conn = this.manager.getConnection();
-                String loginQuery = "SELECT COUNT(*) FROM Users WHERE username = ? AND password = SHA1(?)";
-                stmt = conn.prepareStatement(loginQuery);
                 String userID = request.getParameter("userID");
-                String password = request.getParameter("password");
-                stmt.setString(1, userID);
-                stmt.setString(2, password);
-                ResultSet results = stmt.executeQuery();
-                results.next();
                 if (userID.equals(""))
                     out.println("{\"result\":\"error\",\"message\":\"Please enter your username and password.\"}");
-                else if (results.getInt(1) == 0)
-                    out.println("{\"result\":\"error\",\"message\":\"Your username or password is incorrect. Please, try again.\"}");
                 else {
-                    out.println("{\"result\":\"OK\"}");
-                    HttpSession session = request.getSession();
-                    session.setAttribute("userID",userID);
+                    String password = request.getParameter("password");
+                    conn = this.manager.getConnection();
+                    String saltQuery = "SELECT salt FROM Users WHERE username = ?";
+                    stmt = conn.prepareStatement(saltQuery);
+                    stmt.setString(1, userID);
+                    ResultSet results = stmt.executeQuery();
+                    if (results.next()) {
+                        String salt = results.getString("salt");
+                        String loginQuery = "SELECT COUNT(*) FROM Users WHERE username = ? AND password = SHA1(CONCAT(?, ?))";
+                        stmt = conn.prepareStatement(loginQuery);
+                        stmt.setString(1, userID);
+                        stmt.setString(2, salt);
+                        stmt.setString(3, password);
+                        ResultSet results2 = stmt.executeQuery();
+                        results2.next();
+                        if (results2.getInt(1) == 0)
+                            out.println("{\"result\":\"error\",\"message\":\"Please enter your username and password.\"}");
+                        else {
+                            out.println("{\"result\":\"OK\"}");
+                            HttpSession session = request.getSession();
+                            session.setAttribute("userID",userID);
+                            if (request.getParameter("cookie") != null) {
+                                Cookie cookie = new Cookie("userID", userID+":"+Toolbox.getHashedUserID(userID, request.getRemoteAddr(), getServletContext().getInitParameter("secret")));
+                                cookie.setPath("/archer");
+                                cookie.setMaxAge(365*24*60*60);
+                                response.addCookie(cookie);
+                            }
+                        }
+                    } else out.println("{\"result\":\"error\",\"message\":\"Your username or password is incorrect. Please, try again.\"}");
                 }
             } catch (SQLException SQLe) {
                 log("SQL error when logging in", SQLe);

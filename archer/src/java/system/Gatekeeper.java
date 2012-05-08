@@ -1,5 +1,6 @@
 package system;
 
+import util.Toolbox;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -10,6 +11,8 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 public class Gatekeeper implements Filter {
     
@@ -45,13 +48,29 @@ public class Gatekeeper implements Filter {
         
         Throwable problem = null;
         try {
-            javax.servlet.http.HttpSession session = ((javax.servlet.http.HttpServletRequest)request).getSession(false);
-            String bla = ((javax.servlet.http.HttpServletRequest)request).getRequestURI();
-            if (((javax.servlet.http.HttpServletRequest)request).getRequestURI().equals("/archer/")) {
-                if ((session != null) && (session.getAttribute("userID") != null))
+            javax.servlet.http.HttpServletRequest theRequest = ((javax.servlet.http.HttpServletRequest)request);
+            javax.servlet.http.HttpSession session = theRequest.getSession(false);
+            Cookie userCookie = Toolbox.getCookieByName(theRequest.getCookies(), "userID");
+            if (userCookie != null) {
+                String userID = userCookie.getValue().split(":")[0];
+                String hash = userCookie.getValue().substring(userID.length()+1);
+                if (Toolbox.getHashedUserID(userID, request.getRemoteAddr(), theRequest.getServletContext().getInitParameter("secret")).equals(hash)) {
+                    session = theRequest.getSession();
+                    session.setAttribute("userID", userID);
+                } else {
+                    userCookie.setValue(""); userCookie.setMaxAge(0); ((javax.servlet.http.HttpServletResponse)response).addCookie(userCookie);
+                    if (session != null) session.invalidate();
+                    throw new LoginFailureException("You have been logged out of the system for security reasons. You can log back in.");
+                }
+            }
+            if (theRequest.getRequestURI().equals("/archer/")) {
+                if ((session != null) && (session.getAttribute("userID") != null)) {
                     throw new AlreadyLoggedInException();
-            } else if ((session == null) || (session.getAttribute("userID") == null))
-                throw new LoginFailureException("You are not logged in. Please login before using Archer.");
+                }
+            } else if ((session == null) || (session.getAttribute("userID") == null)) {
+                if (userCookie != null) {
+                } else throw new LoginFailureException("You are not logged in. Please login before using Archer.");
+            }
             chain.doFilter(request, response);
         } catch (Throwable t) {
             // If an exception is thrown somewhere down the filter chain,
