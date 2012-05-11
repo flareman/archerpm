@@ -6,9 +6,9 @@
 <!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
 <!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
 <!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js dashboard" lang="en"> <!--<![endif]-->
 
-<html>
+<html class="dashboard">
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width" />
@@ -25,18 +25,21 @@
 	<![endif]-->
 
 </head>
-    <body>
-        <div class="container">
-            <div class="top row"></div>
+    <body class="dashboard">
+        <div class="container dashboard shadow">
+            <div class="top row">
+                <div class="two columns top logo"></div>
+                <div class="ten columns">
+                    
+                </div>
+            </div>
             <div class="row">
-                <div class="four columns">
-                    <div class="panel radius">
-                        
+                <div class="three columns">
+                    <div class="shadow panel radius">
                     </div>
                 </div>
-                <div class="eight columns">
-                    <div class="panel radius">
-                        
+                <div class="nine columns">
+                    <div class="shadow panel">
                     </div>
                 </div>
             </div>
