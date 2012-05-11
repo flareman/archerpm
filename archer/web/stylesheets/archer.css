@@ -52,4 +52,6 @@ body {
 
 .form-field.success label, label.green { color: #006600; }
 
-.form-field.success small, small.success { margin-top: -6px; display: block; margin-bottom: 9px; font-size: 11px; color: #006600; width: 254px; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; }
+div.top.row {
+    margin-top: 20px;
+}

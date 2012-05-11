@@ -8,6 +8,7 @@ import java.math.BigInteger;
 
 public class Toolbox {
     public static Cookie getCookieByName(Cookie[] cookies, String key) {
+        if (cookies == null) return null;
         for (Cookie c: cookies)
             if (c.getName().equals(key))
                 return c;
