@@ -73,3 +73,57 @@ div.top.row { padding-top: 20px; margin-bottom: 10px; }
     background-color: transparent;
     background-image: url('../images/archer/toplogo.png');
 }
+
+.top.settings {
+    height: 30px;
+    margin-top: 12px;
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-size: contain;
+    background-color: transparent;
+    background-image: url('../images/archer/gear.png');
+}
+
+.top.settings.hover {
+    background-image: url('../images/archer/gear2.png');
+}
+
+a#gear {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#settings-menu {
+    padding: 20px 20px 20px 20px;
+    background: #eaeaea;
+    background: -moz-linear-gradient(top, #FFFFFF 0%, #F0F0F0 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFFFFF), color-stop(100%,#F0F0F0));
+    background: -o-linear-gradient(top, #ffffff 0%,#f0f0f0 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#F0F0F0',GradientType=0 );
+    -webkit-box-shadow:  0px 0px 5px 5px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow:  0px 0px 5px 5px rgba(0, 0, 0, 0.15);
+    box-shadow:  0px 0px 5px 5px rgba(0, 0, 0, 0.15);
+    margin: 0 0 20px 0;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    position: absolute;
+    width: 80px;
+    z-index: 100;
+    top: 70px;
+    right: 475px;
+    display: none;
+}
+
+#settings-menu > a {
+    display: block;
+    font-weight: bold;
+}
+
+#settings-menu > a:hover, #settings-menu > a:focus {
+    display: block;
+    color: #19773a;
+}

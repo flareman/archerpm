@@ -29,8 +29,12 @@
         <div class="container dashboard shadow">
             <div class="top row">
                 <div class="two columns top logo"></div>
-                <div class="ten columns">
-                    
+                <div class="nine columns"></div>
+                <div class="one column top settings"><a href="#" id="gear"></a></div>
+                <div id="settings-menu">
+                    <a href="#" id="userSettings">Settings</a>
+                    <hr />
+                    <a href="#" id="logout">Logout</a>
                 </div>
             </div>
             <div class="row">
