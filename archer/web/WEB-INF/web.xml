@@ -43,6 +43,10 @@
         <servlet-name>GetUserProjects</servlet-name>
         <servlet-class>system.GetUserProjects</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>GetUserTasks</servlet-name>
+        <servlet-class>system.GetUserTasks</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>PerformLogin</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -66,6 +70,10 @@
     <servlet-mapping>
         <servlet-name>GetUserProjects</servlet-name>
         <url-pattern>/userprojects</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GetUserTasks</servlet-name>
+        <url-pattern>/usertasks</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

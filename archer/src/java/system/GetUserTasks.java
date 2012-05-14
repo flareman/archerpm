@@ -1,7 +1,7 @@
 
 package system;
 
-import data.Project;
+import data.Task;
 import java.util.ArrayList;
 import data.DBManager;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-public class GetUserProjects extends HttpServlet {
+public class GetUserTasks extends HttpServlet {
     private DBManager manager;
     
     @Override // THANK YOU CAPTAIN MARVELOUS
@@ -38,25 +38,26 @@ public class GetUserProjects extends HttpServlet {
                     String userID = request.getParameter("userID");
                     if (userID.equals("")) out.print("");//redundant error check for blank username
                     else{
-                        ArrayList<Project> projectList = new ArrayList<Project>();
+                        ArrayList<Task> taskList = new ArrayList<Task>();
                         conn = this.manager.getConnection();
-                        String query = "SELECT title,description,manager,begisAt,totalDuration FROM Projects as p1,(SELECT projectID FROM ProjectHasUsers WHERE username = ? ) as p2 WHERE p1.projectID = p2.projectID ";
+                        String query = "SELECT project,title,description,priority,completed,begisAt,endedAt,duration FROM Tasks as t1,(SELECT task FROM TaskHasUsers WHERE username = ? ) as t2 WHERE t1.taskID = t2.task ";
                         stmt = conn.prepareStatement(query);
                         stmt.setString(1, userID);
                         ResultSet results = stmt.executeQuery();
                         int i = 0;
                         while(results.next()){
                             i++;
-                            Project project = new Project(results.getString("title"),
-                                results.getString("description"),results.getString("manager"),
-                                results.getDate("beginsAt"),results.getInt("totalDuration"));
-                            projectList.add(project);
+                            Task task = new Task(results.getInt("taskID"),results.getString("title"),
+                                results.getString("description"),results.getInt("priority"),
+                                results.getDate("beginsAt"),results.getDate("endedAt"),
+                                results.getInt("duration"),results.getBoolean("completed"));
+                            taskList.add(task);
                         }
                         if(i==0){
-                            //No Projects handling here
+                            //No tasks handling here
                         }
                         else{
-                            //send project arraylist over GSON
+                            //send task arraylist over GSON
                         }
                     }
                 }
