@@ -40,7 +40,7 @@ public class GetUserProjects extends HttpServlet {
                     else{
                         ArrayList<Project> projectList = new ArrayList<Project>();
                         conn = this.manager.getConnection();
-                        String query = "";
+                        String query = "SELECT title,description,manager,begisAt,totalDuration FROM Projects as p1,(SELECT projectID FROM ProjectHasUsers WHERE username = ?) as p2 WHERE p1.projectID = p2.projectID ";
                         stmt = conn.prepareStatement(query);
                         stmt.setString(1, userID);
                         ResultSet results = stmt.executeQuery();
@@ -48,8 +48,15 @@ public class GetUserProjects extends HttpServlet {
                         while(results.next()){
                             i++;
                             Project project = new Project(results.getString("title"),
-                                    results.getString("description"),results.getString("manager"),
-                                    results.getDate("beginsAt"),results.getInt("totalDuration"));
+                                results.getString("description"),results.getString("manager"),
+                                results.getDate("beginsAt"),results.getInt("totalDuration"));
+                            projectList.add(project);
+                        }
+                        if(i==0){
+                            //No Projects handling here
+                        }
+                        else{
+                            //send project arraylist over GSON
                         }
                     }
                 }
