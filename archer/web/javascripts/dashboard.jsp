@@ -2,10 +2,34 @@
 
 $(function() {
     prepareSettings();
+    prepareTest();
 });
 
 $(window).load(function() {
 });
+
+var prepareTest = function() {
+    $('#testGson').click(function(e) {
+        e.preventDefault();
+        $('#result').html("");
+        $.ajax({  
+        type: "POST",
+        url: "<%= response.encodeURL("dashboard/userlist") %>",
+        dataType: "json",
+        success: function(data) {
+            if (data.hasOwnProperty("error"))
+                $('#result').html(data.error);
+            else $.each(data, function(i, user) {
+                $('#result').append(i+": "+user.username);
+            });
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $('#result').html(thrownError);
+        }
+        });
+        return false;
+    });
+}
 
 var prepareSettings = function() {
     $('#gear').hover(function() { $('.top.settings').addClass("hover"); },

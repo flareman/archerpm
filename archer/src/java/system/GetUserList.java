@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package system;
 
 import data.DBManager;
@@ -17,59 +13,54 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import com.google.gson.*;
 
 public class GetUserList extends HttpServlet {
     
-    private DBManager manager;
+    private DBManager manager; // We tried to login so hard; still, the fires were still falling #d3
     
-    @Override // THANK YOU CAPTAIN MARVELOUS
+    @Override // THANK YOU CAPTAIN LUDICROUS
     public void init() throws ServletException {this.manager = DBManager.getManager();}
    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("text/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try {
             Connection conn = null;
             PreparedStatement stmt = null;
             try {
-                HttpSession session = request.getSession(false);
-                if(session == null){
-                    //error handling for no valid session
-                }
-                else{
-                    String userID = request.getParameter("userID");
-                    if (userID.equals("")) out.print("");//redundant error check for blank username
-                    else{
-                        conn = this.manager.getConnection();
-                        String query = "SELECT description FROM (SELECT status FROM Users WHERE username = ? ) as t,Status WHERE t.status = Status.statusID ";
-                        stmt = conn.prepareStatement(query);
-                        stmt.setString(1, userID);
-                        ResultSet preresults = stmt.executeQuery();
-                        if(preresults.getString("description").equals("Site Administrator")){
-                            ArrayList<User> userList = new ArrayList<User>();
-                            query = "SELECT username,name,surname,email,status FROM Users";
+                String userID = (String)request.getSession().getAttribute("userID");
+                if ((userID != null) && (!userID.equals(""))) {
+                    conn = this.manager.getConnection();
+                    String query = "SELECT Status.description FROM Users, Status WHERE Users.username = ? AND Status.statusID = Users.status";
+                    stmt = conn.prepareStatement(query);
+                    stmt.setString(1, userID);
+                    ResultSet userCapacityRes = stmt.executeQuery();
+                    if (userCapacityRes.next()) {
+                        if (userCapacityRes.getString("description").equals("Site Administrator")) {
+                            ArrayList<User> users = new ArrayList<User>();
+                            query = "SELECT username, name, surname, email, status FROM Users";
                             stmt = conn.prepareStatement(query);
                             ResultSet results = stmt.executeQuery();
-                            int i = 0;
-                            while(results.next()){
-                                i++;
-                                User user = new User(results.getString("username"),results.getString("name"),
-                                    results.getString("surname"),results.getString("email"),results.getInt("status"));
-                                userList.add(user);
+                            while (results.next())
+                                users.add(new User(results.getString("username"),results.getString("name"),
+                                    results.getString("surname"),results.getString("email"),results.getInt("status")));
+                            if (users.isEmpty()) {
+                                out.println("{\"error\":\"No users found\"}");
+                            } else {
+                                Gson gson = new Gson();
+                                String output = gson.toJson(users, users.getClass());
+                                out.println(output);
                             }
-                            if(i==0){
-                                //No users handling here
-                            }
-                            else{
-                                //send user arraylist over GSON
-                            }
+                        } else {
+                            // User not an admin
                         }
-                        else{
-                            //Not an admin redundant error check
-                        }
+                    } else {
+                        // User not present
                     }
+                } else {
+                    // User without session
                 }
             }
             catch(SQLException SQLe) {

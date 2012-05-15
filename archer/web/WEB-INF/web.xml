@@ -72,16 +72,16 @@
         <url-pattern>/dashboard/logout</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>GetUserProjects</servlet-name>
-        <url-pattern>/userprojects</url-pattern>
+        <servlet-name>GetUserList</servlet-name>
+        <url-pattern>/dashboard/userlist</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>GetUserTasks</servlet-name>
-        <url-pattern>/usertasks</url-pattern>
+        <url-pattern>/dashboard/usertasks</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>GetUserList</servlet-name>
-        <url-pattern>/userlist</url-pattern>
+        <servlet-name>GetUserProjects</servlet-name>
+        <url-pattern>/dashboard/userprojects</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

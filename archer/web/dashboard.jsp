@@ -44,6 +44,8 @@
                 </div>
                 <div class="nine columns">
                     <div class="shadow panel">
+                        <a href="#" id="testGson">Get Users</a>
+                        <p id="result"></p>
                     </div>
                 </div>
             </div>
