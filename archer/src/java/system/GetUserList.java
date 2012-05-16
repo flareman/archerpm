@@ -30,45 +30,64 @@ public class GetUserList extends HttpServlet {
             Connection conn = null;
             PreparedStatement stmt = null;
             try {
-                String userID = (String)request.getSession().getAttribute("userID");
-                if ((userID != null) && (!userID.equals(""))) {
+                User user = (User)request.getSession().getAttribute("user");
+                if (user != null) {
                     conn = this.manager.getConnection();
-                    String query = "SELECT Status.description FROM Users, Status WHERE Users.username = ? AND Status.statusID = Users.status";
+                    String query = "SELECT description FROM Status WHERE statusID = ?";
                     stmt = conn.prepareStatement(query);
-                    stmt.setString(1, userID);
+                    stmt.setInt(1, user.getStatusID());
                     ResultSet userCapacityRes = stmt.executeQuery();
                     if (userCapacityRes.next()) {
-                        if (userCapacityRes.getString("description").equals("Site Administrator")) {
-                            ArrayList<User> users = new ArrayList<User>();
-                            query = "SELECT username, name, surname, email, status FROM Users";
+                        boolean validRequest = true;
+                        ArrayList<User> users = new ArrayList<User>();
+                        String kind = request.getParameter("kind");
+                        if (kind.equals("all")) {
+                            if (userCapacityRes.getString("description").equals("Site Administrator")) {
+                                query = "SELECT username, name, surname, email, status FROM Users";
+                                stmt = conn.prepareStatement(query);
+                            } else {
+                                out.println("{\"error\":\"Requesting user is not an administrator\"}");
+                                validRequest = false;
+                            }
+                        } else if (kind.equals("task")) {
+                            Integer task = Integer.parseInt(request.getParameter("task"));
+                            query = "SELECT username, name, surname, email, status FROM Users, TaskHasUsers WHERE TaskHasUsers.taskID = ? AND Users.username = TaskHasUsers.username";
                             stmt = conn.prepareStatement(query);
+                            stmt.setInt(1, task);
+                        } else if (kind.equals("project")) {
+                            Integer project = Integer.parseInt(request.getParameter("project"));
+                            query = "SELECT username, name, surname, email, status FROM Users, ProjectHasUsers WHERE ProjectHasUsers.projectID = ? AND Users.username = ProjectHasUsers.username";
+                            stmt = conn.prepareStatement(query);
+                            stmt.setInt(1, project);
+                        } else {
+                            validRequest = false;
+                            out.println("{\"error\":\"Wrong argument\"}");
+                        }
+                        if (validRequest) {
                             ResultSet results = stmt.executeQuery();
                             while (results.next())
                                 users.add(new User(results.getString("username"),results.getString("name"),
                                     results.getString("surname"),results.getString("email"),results.getInt("status")));
-                            if (users.isEmpty()) {
-                                out.println("{\"error\":\"No users found\"}");
-                            } else {
+                            if (users.isEmpty()) out.println("{\"error\":\"No users found\"}");
+                            else {
                                 Gson gson = new Gson();
                                 String output = gson.toJson(users, users.getClass());
                                 out.println(output);
                             }
-                        } else {
-                            // User not an admin
                         }
                     } else {
-                        // User not present
+                        out.println("{\"error\":\"Requesting user not found\"}");
                     }
                 } else {
-                    // User without session
+                    out.println("{\"error\":\"Requesting user not logged in\"}");
                 }
             }
             catch(SQLException SQLe) {
                 log("SQL error when logging in", SQLe);
             } finally {
                 try {
-                    stmt.close();
-                    conn.close();
+                    if (stmt != null) stmt.close();
+                    if (conn != null) conn.close();
                 } catch (Exception e) { e.printStackTrace(); }
             }
         } finally {            

@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ page import="util.Toolbox" %>
+<%@ page import="data.User" %>
 
 <!DOCTYPE html>
 
@@ -32,8 +33,9 @@
                 <div class="nine columns"></div>
                 <div class="one column top settings"><a href="#" id="gear"></a></div>
                 <div id="settings-menu">
-                    <a href="#" id="userSettings">Settings</a>
+                    <p><%=((User)request.getSession().getAttribute("user")).getName()+" "+((User)request.getSession().getAttribute("user")).getSurname() %></p>
                     <hr />
+                    <a href="#" id="userSettings">Settings</a>
                     <a href="#" id="logout">Logout</a>
                 </div>
             </div>
@@ -44,7 +46,7 @@
                 </div>
                 <div class="nine columns">
                     <div class="shadow panel">
-                        <a href="#" id="testGson">Get Users</a>
+                        <p><a href="#" id="testGson">Get Users</a></p>
                         <p id="result"></p>
                     </div>
                 </div>

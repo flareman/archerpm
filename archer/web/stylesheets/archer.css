@@ -111,7 +111,7 @@ a#gear {
     -webkit-border-radius: 5px;
     border-radius: 5px;
     position: absolute;
-    width: 80px;
+    width: 10em;
     z-index: 100;
     top: 70px;
     right: 475px;
@@ -121,6 +121,7 @@ a#gear {
 #settings-menu > a {
     display: block;
     font-weight: bold;
+    margin-top: 1em;
 }
 
 #settings-menu > a:hover, #settings-menu > a:focus {

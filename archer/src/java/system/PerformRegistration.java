@@ -5,12 +5,12 @@
 package system;
 
 import data.DBManager;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +31,7 @@ public class PerformRegistration extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/plain;charset=UTF-8");
+        response.setContentType("text/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try {
             Connection conn = null;
@@ -48,26 +48,26 @@ public class PerformRegistration extends HttpServlet {
                 results.next();
                
                 if (results.getInt(1) != 0)
-                    out.println("{\"result\":\"error\",\"message\":\"The username you asked for is taken, sorry. Please pick another.\"}");
+                    out.println("{\"error\":\"The username you asked for is taken, sorry. Please pick another.\"}");
                 else if (newUserID.equals(""))
-                    out.println("{\"result\":\"error\",\"message\":\"You must provide a username to register.\"}");
+                    out.println("{\"error\":\"You must provide a username to register.\"}");
                 else if (email.equals(""))
-                    out.println("{\"result\":\"error\",\"message\":\"You must provide a valid e-mail address to register.\"}");
+                    out.println("{\"error\":\"You must provide a valid e-mail address to register.\"}");
                 else if (pass.length() < 6)
-                    out.println("{\"result\":\"error\",\"message\":\"Your password must be at least 6 characters long.\"}");
+                    out.println("{\"error\":\"Your password must be at least 6 characters long.\"}");
                 else {
                     checkQuery = "INSERT INTO Users(username,salt,password,name,surname,email,status) VALUES(?,?,SHA1(CONCAT(?,?)),?,?,?,?)";
                     stmt = conn.prepareStatement(checkQuery);
                     newUserID = request.getParameter("newUserID");
                     String pass2 = request.getParameter("passcheck");
                     if(!(pass.equals(pass2)))
-                        out.println("{\"result\":\"error\",\"message\":\"Oops! Passwords provided do not match.\"}");
+                        out.println("{\"error\":\"Oops! Passwords provided do not match.\"}");
                     else{
                         String name = request.getParameter("name");
                         String surname = request.getParameter("surname");
                         String email2 = request.getParameter("email2");
                         if(!(email.equals(email2))){
-                            out.println("{\"result\":\"error\",\"message\":\"Oops! Emails provided do not match.\"}");
+                            out.println("{\"error\":\"Oops! Emails provided do not match.\"}");
                         }
                         else{
                             stmt.setString(1, newUserID);
@@ -80,13 +80,10 @@ public class PerformRegistration extends HttpServlet {
                             stmt.setString(7, email);
                             stmt.setString(8, "4");
                             stmt.executeUpdate();
-                            out.println("{\"result\":\"OK\"}");
-
+                            out.println("{}");
                         }
                     }
-                    
                 }
-                
             } catch (SQLException SQLe){
                 log("SQL error while registering new user", SQLe);
             } finally{

@@ -26,22 +26,21 @@ var submitLoginForm = function (){
     $("#loginButton").attr("disabled", "disabled");
     $.ajax({  
       type: "POST",
+      dataType: "json",
       url: "<%= response.encodeURL("login") %>",  
       data: $(this).serialize(),
       success: function(data) {
-        var r = $.parseJSON(data);
         var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","loginResult");
         alertbox.hide();
-        if (r.result === "error") {
-            alertbox.html(r.message);
+        if (data.hasOwnProperty("error")) {
+            alertbox.html(data.error);
             alertbox.addClass("error");
         }
         $("#loginResult").fadeOut(300, function() {
-            if (r.result === "OK") window.location.replace("<%= response.encodeURL("dashboard") %>");
-            else {
+            if (data.hasOwnProperty("error")) {
                 $("#loginResult").replaceWith(alertbox);
                 alertbox.fadeIn(400);
-            }
+            } else window.location.replace("<%= response.encodeURL("dashboard") %>");
         });
         $("#loginButton").removeAttr("disabled");
       },
@@ -66,13 +65,13 @@ var registerNewUser = function() {
     $.ajax({  
       type: "POST",  
       url: "<%= response.encodeURL("register") %>",  
-      data: $(this).serialize(),  
+      data: $(this).serialize(),
+      dataType: "json",
       success: function(data) {
-        var r = $.parseJSON(data);
         var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","registerResult");
         alertbox.hide();
-        if (r.result === "error") {
-            alertbox.html(r.message);
+        if (data.hasOwnProperty("error")) {
+            alertbox.html(data.error);
             alertbox.addClass("error");
         } else {
             alertbox.html("Registered nicely! We'll take you back to the login page automatically in 3 seconds.");
@@ -81,7 +80,7 @@ var registerNewUser = function() {
         $("#registerResult").fadeOut(300, function() {
             $("#registerResult").replaceWith(alertbox);
             alertbox.fadeIn(400);
-            if (r.result === "OK") alertbox.delay(2000).fadeOut();
+            if (data.hasOwnProperty("error") == false) alertbox.delay(2000).fadeOut();
         });
         $("#registerButton").removeAttr("disabled");
         setTimeout(function(){
@@ -96,7 +95,6 @@ var registerNewUser = function() {
         $("#registerResult").fadeOut(300, function() {
             $("#registerResult").replaceWith(alertbox);
             alertbox.fadeIn(400);
-            if (r.result === "OK") alertbox.delay(2000).fadeOut();
         });
         $("#registerButton").removeAttr("disabled");
       }
@@ -160,16 +158,16 @@ function createRegForm() {
             $.ajax({  
                 type: "POST",  
                 url: "<%= response.encodeURL("check") %>",  
-                data: regForm.serialize(),  
+                data: regForm.serialize(),
+                dataType: "json",
                 success: function(data) {
-                    var r = $.parseJSON(data);
                     var label = $("<label />").attr("for", "newUserID").addClass("userIDError");
-                    if (r.result == "OK") {
-                        label.html("Username not taken").addClass("green");
-                        regForm.addClass("userIDValid");
-                    } else {
+                    if (data.hasOwnProperty("error")) {
                         label.html("The username is taken; choose another").addClass("red");
                         regForm.removeClass("userIDValid");
+                    } else {
+                        label.html("Username not taken").addClass("green");
+                        regForm.addClass("userIDValid");
                     }
                     if ($(".userIDError").exists())
                         $(".userIDError").each(function(i) {

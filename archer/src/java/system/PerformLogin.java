@@ -1,18 +1,15 @@
 package system;
 
 import data.DBManager;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import data.User;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.*;
 import util.Toolbox;
 
 public class PerformLogin extends HttpServlet {
@@ -25,7 +22,7 @@ public class PerformLogin extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/plain");
+        response.setContentType("text/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
         try {
@@ -34,7 +31,7 @@ public class PerformLogin extends HttpServlet {
             try {
                 String userID = request.getParameter("userID");
                 if (userID.equals(""))
-                    out.println("{\"result\":\"error\",\"message\":\"Please enter your username and password.\"}");
+                    out.println("{\"error\":\"Please enter your username and password.\"}");
                 else {
                     String password = request.getParameter("password");
                     conn = this.manager.getConnection();
@@ -44,27 +41,25 @@ public class PerformLogin extends HttpServlet {
                     ResultSet results = stmt.executeQuery();
                     if (results.next()) {
                         String salt = results.getString("salt");
-                        String loginQuery = "SELECT COUNT(*) FROM Users WHERE username = ? AND password = SHA1(CONCAT(?, ?))";
+                        String loginQuery = "SELECT username, name, surname, email, status FROM Users WHERE username = ? AND password = SHA1(CONCAT(?, ?))";
                         stmt = conn.prepareStatement(loginQuery);
                         stmt.setString(1, userID);
                         stmt.setString(2, salt);
                         stmt.setString(3, password);
                         ResultSet results2 = stmt.executeQuery();
-                        results2.next();
-                        if (results2.getInt(1) == 0)
-                            out.println("{\"result\":\"error\",\"message\":\"Please enter your username and password.\"}");
-                        else {
-                            out.println("{\"result\":\"OK\"}");
+                        if (results2.next()) {
+                            out.println("{}");
                             HttpSession session = request.getSession();
-                            session.setAttribute("userID",userID);
+                            User user = new User(results2.getString("username"), results2.getString("name"), results2.getString("surname"), results2.getString("email"), results2.getInt("status"));
+                            session.setAttribute("user",user);
                             if (request.getParameter("cookie") != null) {
-                                Cookie cookie = new Cookie("userID", userID+":"+Toolbox.getHashedUserID(userID, request.getRemoteAddr(), getServletContext().getInitParameter("secret")));
+                                Cookie cookie = new Cookie("userID", user.getUsername()+":"+Toolbox.getHashedUserID(user.getUsername(), request.getRemoteAddr(), getServletContext().getInitParameter("secret")));
                                 cookie.setPath("/archer");
                                 cookie.setMaxAge(365*24*60*60);
                                 response.addCookie(cookie);
                             }
-                        }
-                    } else out.println("{\"result\":\"error\",\"message\":\"Your username or password is incorrect. Please, try again.\"}");
+                        } else out.println("{\"error\":\"Please enter your username and password.\"}");
+                    } else out.println("{\"error\":\"Your username or password is incorrect. Please, try again.\"}");
                 }
             } catch (SQLException SQLe) {
                 log("SQL error when logging in", SQLe);

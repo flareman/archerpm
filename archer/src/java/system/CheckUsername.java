@@ -22,13 +22,13 @@ public class CheckUsername extends HttpServlet {
   
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/plain");
+        response.setContentType("text/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
         try {
             Connection conn = null;
             PreparedStatement stmt = null;
-            try{
+            try {
                 conn = this.manager.getConnection();
                 String checkQuery = "SELECT COUNT(*) FROM Users WHERE username = ?";
                 stmt = conn.prepareStatement(checkQuery);
@@ -36,9 +36,9 @@ public class CheckUsername extends HttpServlet {
                 stmt.setString(1, newUserID);
                 ResultSet results = stmt.executeQuery();
                 results.next();
-                if (results.getInt(1) == 0)out.println("{\"result\":\"OK\"}");
+                if (results.getInt(1) == 0)out.println("{}");
                 else{
-                    out.println("{\"result\":\"error\",\"message\":\"Oops!Somebody got your username first, try again with a different one.\"}");
+                    out.println("{\"error\":\"Oops! Somebody got your username first, try again with a different one.\"}");
                 }
             } catch (SQLException SQLe){
                 log("SQL error when checking new username", SQLe);

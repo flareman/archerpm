@@ -11,17 +11,20 @@ $(window).load(function() {
 var prepareTest = function() {
     $('#testGson').click(function(e) {
         e.preventDefault();
-        $('#result').html("");
         $.ajax({  
         type: "POST",
-        url: "<%= response.encodeURL("dashboard/userlist") %>",
+        url: "<%= response.encodeURL("dashboard/users") %>",
+        data: {"kind": "all"},
         dataType: "json",
         success: function(data) {
             if (data.hasOwnProperty("error"))
                 $('#result').html(data.error);
-            else $.each(data, function(i, user) {
-                $('#result').append(i+": "+user.username);
-            });
+            else {
+                $('#result').html('<table><thead><tr><th>#</th><th>User Name</th><th>First Name</th><th>Last Name</th><th>E-mail Address</th></tr></thead><tbody id="usersTableBody"></tbody></table>');
+                $.each(data, function(i, user) {
+                    $('#usersTableBody').append("<tr>"+"<td>"+(i+1)+"</td><td>"+user.username+"</td><td>"+user.name+"</td><td>"+user.surname+"</td><td>"+user.email+"</td></tr>");
+                });
+            }
         },
         error: function(xhr, ajaxOptions, thrownError) {
             $('#result').html(thrownError);

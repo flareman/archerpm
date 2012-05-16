@@ -1,48 +1,39 @@
 package system;
 
-import util.Toolbox;
+import data.DBManager;
+import data.User;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.servlet.*;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import util.Toolbox;
 
 public class Gatekeeper implements Filter {
-    
-    private static final boolean debug = false;
     private FilterConfig filterConfig = null;
+    private DBManager manager;
     
-    public Gatekeeper() {
-    }    
-    
+    public Gatekeeper() {}    
     private void doBeforeProcessing(ServletRequest request, ServletResponse response)
-            throws IOException, ServletException {
-        if (debug) {
-            log("Gatekeeper:DoBeforeProcessing");
-        }
-    }    
-    
+            throws IOException, ServletException {}    
     private void doAfterProcessing(ServletRequest request, ServletResponse response)
-            throws IOException, ServletException {
-        if (debug) {
-            log("Gatekeeper:DoAfterProcessing");
+            throws IOException, ServletException {}
+
+    public void init(FilterConfig filterConfig) {        
+        this.filterConfig = filterConfig;
+        if (filterConfig != null) {
         }
+        this.manager = DBManager.getManager();
     }
 
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain)
             throws IOException, ServletException {
-        
-        if (debug) {
-            log("Gatekeeper:doFilter()");
-        }
         
         doBeforeProcessing(request, response);
         
@@ -56,7 +47,26 @@ public class Gatekeeper implements Filter {
                 String hash = userCookie.getValue().substring(userID.length()+1);
                 if (Toolbox.getHashedUserID(userID, request.getRemoteAddr(), theRequest.getServletContext().getInitParameter("secret")).equals(hash)) {
                     session = theRequest.getSession();
-                    session.setAttribute("userID", userID);
+                    Connection conn = null;
+                    PreparedStatement stmt = null;
+                    try {
+                        conn = this.manager.getConnection();
+                        String userQuery = "SELECT username, name, surname, email, status FROM Users WHERE username = ?";
+                        stmt = conn.prepareStatement(userQuery);
+                        stmt.setString(1, userID);
+                        ResultSet results = stmt.executeQuery();
+                        if (results.next()) {
+                            User user = new User(results.getString("username"), results.getString("name"), results.getString("surname"), results.getString("email"), results.getInt("status"));
+                            session.setAttribute("user", user);
+                        } else throw new LoginFailureException("The user previously logged in no longer exists. Try again please.");
+                    } catch (SQLException SQLe){
+                        log("SQL error when checking new username");
+                    } finally {
+                        try {
+                            stmt.close();
+                            conn.close();
+                        } catch (Exception e) { e.printStackTrace(); }
+                    }
                 } else {
                     userCookie.setValue(""); userCookie.setMaxAge(0); ((javax.servlet.http.HttpServletResponse)response).addCookie(userCookie);
                     if (session != null) session.invalidate();
@@ -64,10 +74,10 @@ public class Gatekeeper implements Filter {
                 }
             }
             if (theRequest.getRequestURI().equals("/archer/")) {
-                if ((session != null) && (session.getAttribute("userID") != null)) {
+                if ((session != null) && (session.getAttribute("user") != null)) {
                     throw new AlreadyLoggedInException();
                 }
-            } else if ((session == null) || (session.getAttribute("userID") == null)) {
+            } else if ((session == null) || (session.getAttribute("user") == null)) {
                 if (userCookie != null) {
                 } else throw new LoginFailureException("You are not logged in. Please login before using Archer.");
             }
@@ -77,7 +87,7 @@ public class Gatekeeper implements Filter {
             // we still want to execute our after processing, and then
             // rethrow the problem after that.
             problem = t;
-            t.printStackTrace();
+            // t.printStackTrace();
         }
         
         doAfterProcessing(request, response);
@@ -110,15 +120,6 @@ public class Gatekeeper implements Filter {
     }
 
     public void destroy() {        
-    }
-
-    public void init(FilterConfig filterConfig) {        
-        this.filterConfig = filterConfig;
-        if (filterConfig != null) {
-            if (debug) {                
-                log("Gatekeeper:Initializing filter");
-            }
-        }
     }
 
     @Override
@@ -181,9 +182,7 @@ public class Gatekeeper implements Filter {
     }
 }
 
-class LoginFailureException extends Exception {
-    public LoginFailureException(String errorMsg) { super(errorMsg); }
-}
+class LoginFailureException extends Exception { public LoginFailureException(String errorMsg) { super(errorMsg); } }
 
 class AlreadyLoggedInException extends Exception {
     public AlreadyLoggedInException() { super(); }
