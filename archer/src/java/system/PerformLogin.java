@@ -41,7 +41,7 @@ public class PerformLogin extends HttpServlet {
                     ResultSet results = stmt.executeQuery();
                     if (results.next()) {
                         String salt = results.getString("salt");
-                        String loginQuery = "SELECT username, name, surname, email, status FROM Users WHERE username = ? AND password = SHA1(CONCAT(?, ?))";
+                        String loginQuery = "SELECT username, name, surname, email, description AS status FROM Users, Status WHERE username = ? AND password = SHA1(CONCAT(?, ?)) AND Status.statusID = Users.status";
                         stmt = conn.prepareStatement(loginQuery);
                         stmt.setString(1, userID);
                         stmt.setString(2, salt);
@@ -50,7 +50,7 @@ public class PerformLogin extends HttpServlet {
                         if (results2.next()) {
                             out.println("{}");
                             HttpSession session = request.getSession();
-                            User user = new User(results2.getString("username"), results2.getString("name"), results2.getString("surname"), results2.getString("email"), results2.getInt("status"));
+                            User user = new User(results2.getString("username"), results2.getString("name"), results2.getString("surname"), results2.getString("email"), results2.getString("status"));
                             session.setAttribute("user",user);
                             if (request.getParameter("cookie") != null) {
                                 Cookie cookie = new Cookie("userID", user.getUsername()+":"+Toolbox.getHashedUserID(user.getUsername(), request.getRemoteAddr(), getServletContext().getInitParameter("secret")));

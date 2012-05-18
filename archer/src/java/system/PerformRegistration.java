@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package system;
 
 import data.DBManager;
@@ -17,10 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import util.Toolbox;
 
-/**
- *
- * @author george
- */
 public class PerformRegistration extends HttpServlet {
     private DBManager manager;
     

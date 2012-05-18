@@ -40,16 +40,16 @@
         <servlet-class>system.PerformLogout</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>GetUserProjects</servlet-name>
-        <servlet-class>system.GetUserProjects</servlet-class>
+        <servlet-name>GetProjects</servlet-name>
+        <servlet-class>system.GetProjects</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>GetUserTasks</servlet-name>
-        <servlet-class>system.GetUserTasks</servlet-class>
+        <servlet-name>GetTasks</servlet-name>
+        <servlet-class>system.GetTasks</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>GetUserList</servlet-name>
-        <servlet-class>system.GetUserList</servlet-class>
+        <servlet-name>GetUsers</servlet-name>
+        <servlet-class>system.GetUsers</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>PerformLogin</servlet-name>
@@ -72,15 +72,15 @@
         <url-pattern>/dashboard/logout</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>GetUserProjects</servlet-name>
+        <servlet-name>GetProjects</servlet-name>
         <url-pattern>/dashboard/projects</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>GetUserTasks</servlet-name>
+        <servlet-name>GetTasks</servlet-name>
         <url-pattern>/dashboard/tasks</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>GetUserList</servlet-name>
+        <servlet-name>GetUsers</servlet-name>
         <url-pattern>/dashboard/users</url-pattern>
     </servlet-mapping>
     <session-config>

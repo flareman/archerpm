@@ -2,14 +2,16 @@
 
 $(function() {
     prepareSettings();
-    prepareTest();
+    prepareGetUsers();
+    prepareGetProjects();
+    prepareGetTasks();
 });
 
 $(window).load(function() {
 });
 
-var prepareTest = function() {
-    $('#testGson').click(function(e) {
+var prepareGetUsers = function() {
+    $('#getUsers').click(function(e) {
         e.preventDefault();
         $.ajax({  
         type: "POST",
@@ -20,9 +22,61 @@ var prepareTest = function() {
             if (data.hasOwnProperty("error"))
                 $('#result').html(data.error);
             else {
-                $('#result').html('<table><thead><tr><th>#</th><th>User Name</th><th>First Name</th><th>Last Name</th><th>E-mail Address</th></tr></thead><tbody id="usersTableBody"></tbody></table>');
+                $('#result').html('<table><thead><tr><th>#</th><th>User Name</th><th>First Name</th><th>Last Name</th><th>E-mail Address</th></tr></thead><tbody id="resultsBody"></tbody></table>');
                 $.each(data, function(i, user) {
-                    $('#usersTableBody').append("<tr>"+"<td>"+(i+1)+"</td><td>"+user.username+"</td><td>"+user.name+"</td><td>"+user.surname+"</td><td>"+user.email+"</td></tr>");
+                    $('#resultsBody').append("<tr>"+"<td>"+(i+1)+"</td><td>"+user.username+"</td><td>"+user.name+"</td><td>"+user.surname+"</td><td>"+user.email+"</td></tr>");
+                });
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $('#result').html(thrownError);
+        }
+        });
+        return false;
+    });
+}
+
+var prepareGetProjects = function() {
+    $('#getProjects').click(function(e) {
+        e.preventDefault();
+        $.ajax({  
+        type: "POST",
+        url: "<%= response.encodeURL("dashboard/projects") %>",
+        data: {"kind": "all"},
+        dataType: "json",
+        success: function(data) {
+            if (data.hasOwnProperty("error"))
+                $('#result').html(data.error);
+            else {
+                $('#result').html('<table><thead><tr><th>#</th><th>Project ID</th><th>Title</th><th>Manager</th><th>Start Date</th><th>Duration</th></tr></thead><tbody id="resultsBody"></tbody></table>');
+                $.each(data, function(i, project) {
+                    $('#resultsBody').append("<tr>"+"<td>"+(i+1)+"</td><td>"+project.id+"</td><td>"+project.title+"</td><td>"+project.manager+"</td><td>"+project.startDate+"</td><td>"+project.duration+"</td></tr>");
+                });
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $('#result').html(thrownError);
+        }
+        });
+        return false;
+    });
+}
+
+var prepareGetTasks = function() {
+    $('#getTasks').click(function(e) {
+        e.preventDefault();
+        $.ajax({  
+        type: "POST",
+        url: "<%= response.encodeURL("dashboard/tasks") %>",
+        data: {"kind": "all"},
+        dataType: "json",
+        success: function(data) {
+            if (data.hasOwnProperty("error"))
+                $('#result').html(data.error);
+            else {
+                $('#result').html('<table><thead><tr><th>#</th><th>Task ID</th><th>Title</th><th>Priority</th><th>Start Date</th><th>Duration</th><th>Completed</th></tr></thead><tbody id="resultsBody"></tbody></table>');
+                $.each(data, function(i, task) {
+                    $('#resultsBody').append("<tr>"+"<td>"+(i+1)+"</td><td>"+task.id+"</td><td>"+task.title+"</td><td>"+task.priority+"</td><td>"+task.startDate+"</td><td>"+task.duration+"</td><td>"+task.completed+"</td></tr>");
                 });
             }
         },

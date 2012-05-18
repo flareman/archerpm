@@ -51,16 +51,16 @@ public class Gatekeeper implements Filter {
                     PreparedStatement stmt = null;
                     try {
                         conn = this.manager.getConnection();
-                        String userQuery = "SELECT username, name, surname, email, status FROM Users WHERE username = ?";
+                        String userQuery = "SELECT username, name, surname, email, description AS status FROM Users, Status WHERE username = ? AND Status.statusID = Users.status";
                         stmt = conn.prepareStatement(userQuery);
                         stmt.setString(1, userID);
                         ResultSet results = stmt.executeQuery();
                         if (results.next()) {
-                            User user = new User(results.getString("username"), results.getString("name"), results.getString("surname"), results.getString("email"), results.getInt("status"));
+                            User user = new User(results.getString("username"), results.getString("name"), results.getString("surname"), results.getString("email"), results.getString("status"));
                             session.setAttribute("user", user);
                         } else throw new LoginFailureException("The user previously logged in no longer exists. Try again please.");
                     } catch (SQLException SQLe){
-                        log("SQL error when checking new username");
+                        log("SQL error when checking new username: "+SQLe.getLocalizedMessage());
                     } finally {
                         try {
                             stmt.close();
