@@ -59,7 +59,7 @@ public class GetUsers extends HttpServlet {
                             out.println("{\"error\":\"Requested project not found; database corrupt\"}");
                             validRequest = false;
                         }
-                        if (validRequest && !isPublic) {
+                        if (validRequest && !isPublic && user.getStatus() != User.Status.ADMINISTRATOR) {
                             query = "SELECT DISTINCT username FROM ProjectHasUsers WHERE projectID = ? AND username = ?";
                             stmt.close();
                             stmt = conn.prepareStatement(query);
@@ -90,7 +90,7 @@ public class GetUsers extends HttpServlet {
                             out.println("{\"error\":\"Requested project not found; database corrupt\"}");
                             validRequest = false;
                         }
-                        if (validRequest && !isPublic) {
+                        if (validRequest && !isPublic && user.getStatus() != User.Status.ADMINISTRATOR) {
                             query = "SELECT username FROM ProjectHasUsers WHERE projectID = ? AND username = ?";
                             stmt.close();
                             stmt = conn.prepareStatement(query);

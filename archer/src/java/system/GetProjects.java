@@ -54,7 +54,7 @@ public class GetProjects extends HttpServlet {
                     } else if (kind.equals("user")) {
                         String userID = request.getParameter("user");
                         String requesterID = user.getUsername();
-                        query = "SELECT DISTINCT projectID, title, description, manager, isPublic, beginsAt, totalDuration FROM Projects WHERE projectID IN (SELECT projectID FROM ProjectHasUsers.username = ?";
+                        query = "SELECT DISTINCT projectID, title, description, manager, isPublic, beginsAt, totalDuration FROM Projects WHERE (projectID IN (SELECT projectID FROM ProjectHasUsers WHERE username = ?) OR manager = ?)";
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
                             query += " AND (isPublic = 1";
                             query += " OR projectID IN (SELECT projectID FROM ProjectHasUsers WHERE ProjectHasUsers.username = ?)";
@@ -63,9 +63,10 @@ public class GetProjects extends HttpServlet {
                         query += " ORDER BY beginsAt ASC";
                         stmt = conn.prepareStatement(query);
                         stmt.setString(1, userID);
+                        stmt.setString(2, userID);
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
-                            stmt.setString(2, requesterID);
                             stmt.setString(3, requesterID);
+                            stmt.setString(4, requesterID);
                         }
                     } else {
                         validRequest = false;
