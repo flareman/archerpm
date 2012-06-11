@@ -31,12 +31,14 @@
             <div class="top row">
                 <div class="two columns top logo"></div>
                 <div class="nine columns"></div>
-                <div class="one column top settings"><a href="#" id="gear"></a></div>
-                <div id="settings-menu">
-                    <p><%=((User)request.getSession().getAttribute("user")).getName()+" "+((User)request.getSession().getAttribute("user")).getSurname() %></p>
-                    <hr />
-                    <a href="#" id="userSettings">Settings</a>
-                    <a href="#" id="logout">Logout</a>
+                <div class="one column top settings">
+                    <a href="#" id="gear"></a>
+                    <div id="settings-menu">
+                        <p><%=((User)request.getSession().getAttribute("user")).getName()+" "+((User)request.getSession().getAttribute("user")).getSurname() %></p>
+                        <hr />
+                        <a href="#" id="userSettings">Settings</a>
+                        <a href="#" id="logout">Logout</a>
+                    </div>
                 </div>
             </div>
             <div class="row">

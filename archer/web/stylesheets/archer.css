@@ -7,7 +7,10 @@ body {
 
 .container {
     background-image: url('../images/archer/bkg.png');
-    height: 100%;
+    background-repeat: repeat;
+    height: auto;
+    min-width: 960px;
+    min-height: 100%;
 }
 
 .container.dashboard {
@@ -110,11 +113,11 @@ a#gear {
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
-    position: absolute;
     width: 10em;
     z-index: 100;
-    top: 70px;
-    right: 475px;
+    position: absolute;
+    top: 35px;
+    right: -25px;
     display: none;
 }
 
