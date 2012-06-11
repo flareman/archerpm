@@ -51,6 +51,9 @@
                         <p><a href="#" id="getUsers">Get Users</a></p>
                         <p><a href="#" id="getProjects">Get Projects</a></p>
                         <p><a href="#" id="getTasks">Get My Tasks</a></p>
+                        <p><a href="#" id="getComments1">Get Task 1 Comments</a></p>
+                        <p><a href="#" id="getComments2">Get Task 2 Comments</a></p>
+                        <p><a href="#" id="getComments3">Get Task 3 Comments</a></p>
                         <p id="result"></p>
                     </div>
                 </div>

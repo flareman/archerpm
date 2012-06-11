@@ -38,36 +38,46 @@ public class GetTasks extends HttpServlet {
                     ArrayList<Task> tasks = new ArrayList<Task>();
                     String kind = request.getParameter("kind");
                     if (kind.equals("all")) {
-                        query = "SELECT taskID, title, Tasks.description, Priorities.description AS priority, projectID, completed, duration, beginsAt, endedAt FROM Tasks, Priorities WHERE Priorities.priorityID = Tasks.priority";
-                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
-                            query += " AND (";
-                            query += "projectID IN (SELECT projectID FROM Projects WHERE isPublic = 1)";
-                            query += " OR projectID IN (SELECT projectID FROM Projects, ProjectHasUsers WHERE ProjectHasUsers.username = ?)";
-                            query += " OR projectID IN (SELECT projectID FROM Projects WHERE manager = ?)";
-                            query += ")";
-                        }
-                        query += " ORDER BY beginsAt ASC";
+                        query = "SELECT DISTINCT Tasks.taskID, Tasks.title, Tasks.description, Priorities.description AS priority, Tasks.projectID, Tasks.completed, Tasks.duration, Tasks.beginsAt, Tasks.endedAt FROM Tasks, Priorities, TaskHasUsers WHERE Priorities.priorityID = Tasks.priority";
+                        query += " AND Tasks.taskID = TaskHasUsers.taskID AND TaskHasUsers.username = ?";
+                        query += " ORDER BY Tasks.beginsAt ASC";
                         stmt = conn.prepareStatement(query);
-                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
-                            String userID = user.getUsername();
-                            stmt.setString(1, userID);
-                            stmt.setString(2, userID);
-                        }
+                        String requesterID = user.getUsername();
+                        stmt.setString(1, requesterID);
                     } else if (kind.equals("user")) {
                         String userID = request.getParameter("user");
                         String requesterID = user.getUsername();
-                        query = "SELECT taskID, title, Tasks.description, Priorities.description AS priority, projectID, completed, duration, beginsAt, endedAt FROM Tasks, Priorities, TaskHasUsers WHERE Priorities.priorityID = Tasks.priority";
-                        query += " AND taskID IN (SELECT taskID FROM TaskHasUsers WHERE username = ?)";
+                        query = "SELECT DISTINCT Tasks.taskID, Tasks.title, Tasks.description, Priorities.description AS priority, Tasks.projectID, Tasks.completed, Tasks.duration, Tasks.beginsAt, Tasks.endedAt FROM Tasks, Priorities, TaskHasUsers WHERE Priorities.priorityID = Tasks.priority";
+                        query += " AND Tasks.taskID IN (SELECT taskID FROM TaskHasUsers WHERE username = ?)";
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
                             query += " AND (";
-                            query += "projectID IN (SELECT projectID FROM Projects WHERE isPublic = 1)";
-                            query += " OR projectID IN (SELECT projectID FROM Projects, ProjectHasUsers WHERE ProjectHasUsers.username = ?)";
-                            query += " OR projectID IN (SELECT projectID FROM Projects WHERE manager = ?)";
+                            query += "Tasks.projectID IN (SELECT projectID FROM Projects WHERE isPublic = 1)";
+                            query += " OR Tasks.projectID IN (SELECT Projects.projectID FROM Projects, ProjectHasUsers WHERE ProjectHasUsers.username = ?)";
+                            query += " OR Tasks.projectID IN (SELECT projectID FROM Projects WHERE manager = ?)";
                             query += ")";
                         }
-                        query += " ORDER BY beginsAt ASC";
+                        query += " ORDER BY Tasks.beginsAt ASC";
                         stmt = conn.prepareStatement(query);
                         stmt.setString(1, userID);
+                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
+                            stmt.setString(2, requesterID);
+                            stmt.setString(3, requesterID);
+                        }
+                    } else if (kind.equals("project")) {
+                        String projectID = request.getParameter("project");
+                        String requesterID = user.getUsername();
+                        query = "SELECT DISTINCT Tasks.taskID, Tasks.title, Tasks.description, Priorities.description AS priority, Tasks.projectID, Tasks.completed, Tasks.duration, Tasks.beginsAt, Tasks.endedAt FROM Tasks, Priorities WHERE Priorities.priorityID = Tasks.priority";
+                        query += " AND Tasks.projectID = ?";
+                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
+                            query += " AND (";
+                            query += "Tasks.projectID IN (SELECT projectID FROM Projects WHERE isPublic = 1)";
+                            query += " OR Tasks.projectID IN (SELECT Projects.projectID FROM Projects, ProjectHasUsers WHERE ProjectHasUsers.username = ?)";
+                            query += " OR Tasks.projectID IN (SELECT projectID FROM Projects WHERE manager = ?)";
+                            query += ")";
+                        }
+                        query += " ORDER BY Tasks.beginsAt ASC";
+                        stmt = conn.prepareStatement(query);
+                        stmt.setString(1, projectID);
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
                             stmt.setString(2, requesterID);
                             stmt.setString(3, requesterID);

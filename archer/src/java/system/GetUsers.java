@@ -38,7 +38,7 @@ public class GetUsers extends HttpServlet {
                     String kind = request.getParameter("kind");
                     if (kind.equals("all")) {
                         if (user.getStatus() == User.Status.ADMINISTRATOR) {
-                            query = "SELECT username, name, surname, email, description AS status FROM Users, Status WHERE Status.statusID = Users.status ORDER BY surname ASC";
+                            query = "SELECT DISTINCT username, name, surname, email, description AS status FROM Users, Status WHERE Status.statusID = Users.status ORDER BY surname ASC";
                             stmt = conn.prepareStatement(query);
                         } else {
                             out.println("{\"error\":\"Requesting user is not an administrator\"}");
@@ -60,7 +60,7 @@ public class GetUsers extends HttpServlet {
                             validRequest = false;
                         }
                         if (validRequest && !isPublic) {
-                            query = "SELECT username FROM ProjectHasUsers WHERE projectID = ? AND username = ?";
+                            query = "SELECT DISTINCT username FROM ProjectHasUsers WHERE projectID = ? AND username = ?";
                             stmt.close();
                             stmt = conn.prepareStatement(query);
                             stmt.setInt(1, project);
@@ -72,7 +72,7 @@ public class GetUsers extends HttpServlet {
                             }
                         }
                         if (validRequest) {
-                            query = "SELECT username, name, surname, email, description AS status FROM Users, TaskHasUsers, Status WHERE TaskHasUsers.taskID = ? AND Users.username = TaskHasUsers.username AND Status.statusID = Users.status ORDER BY surname ASC";
+                            query = "SELECT DISTINCT username, name, surname, email, description AS status FROM Users, TaskHasUsers, Status WHERE TaskHasUsers.taskID = ? AND Users.username = TaskHasUsers.username AND Status.statusID = Users.status ORDER BY surname ASC";
                             stmt.close();
                             stmt = conn.prepareStatement(query);
                             stmt.setInt(1, task);
@@ -103,7 +103,7 @@ public class GetUsers extends HttpServlet {
                             }
                         }
                         if (validRequest) {
-                            query = "SELECT username, name, surname, email, description AS status FROM Users, ProjectHasUsers, Status WHERE ProjectHasUsers.projectID = ? AND Users.username = ProjectHasUsers.username AND Status.statusID = Users.status ORDER BY surname ASC";
+                            query = "SELECT DISTINCT username, name, surname, email, description AS status FROM Users, ProjectHasUsers, Status WHERE ProjectHasUsers.projectID = ? AND Users.username = ProjectHasUsers.username AND Status.statusID = Users.status ORDER BY surname ASC";
                             stmt.close();
                             stmt = conn.prepareStatement(query);
                             stmt.setInt(1, project);

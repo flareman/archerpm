@@ -1,8 +1,8 @@
 package system;
 
 import com.google.gson.Gson;
+import data.Comment;
 import data.DBManager;
-import data.Project;
 import data.User;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,12 +16,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class GetProjects extends HttpServlet {
+public class GetComments extends HttpServlet {
     private DBManager manager;
     
-    @Override // THANK YOU CAPTAIN OBLIVIOUS
+    @Override // THANK YOU CAPTAIN CANTANKEROUS
     public void init() throws ServletException {this.manager = DBManager.getManager();}
-    
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/json;charset=UTF-8");
@@ -29,66 +29,49 @@ public class GetProjects extends HttpServlet {
         try {
             Connection conn = null;
             PreparedStatement stmt = null;
-            String query = "";
             try {
                 User user = (User)request.getSession().getAttribute("user");
                 if (user != null) {
                     conn = this.manager.getConnection();
-                    boolean validRequest = true;
-                    ArrayList<Project> projects = new ArrayList<Project>();
-                    String kind = request.getParameter("kind");
-                    if (kind.equals("all")) {
-                        query = "SELECT DISTINCT projectID, title, description, manager, isPublic, beginsAt, totalDuration FROM Projects";
+                    ArrayList<Comment> comments = new ArrayList<Comment>();
+                    Integer task = Integer.parseInt(request.getParameter("task"));
+                    if (task >= 0) {
+                        String query = "SELECT DISTINCT Comments.commentID, Comments.content, Comments.timestamp, Comments.username, Comments.taskID";
+                        query += " FROM Comments, Tasks, Projects, ProjectHasUsers WHERE Comments.taskID = Tasks.taskID";
+                        query += " AND Comments.taskID = ? AND Tasks.projectID = Projects.projectID AND Projects.projectID = ProjectHasUsers.projectID";
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
-                            query += " WHERE isPublic = 1";
-                            query += " OR projectID IN (SELECT projectID FROM ProjectHasUsers WHERE ProjectHasUsers.username = ?)";
-                            query += " OR manager = ?";
+                            query += " AND (";
+                            query += "Projects.isPublic = 1";
+                            query += " OR ProjectHasUsers.username = ?";
+                            query += " OR Projects.manager = ?";
+                            query += ")";
                         }
-                        query += " ORDER BY beginsAt ASC";
+                        query += " ORDER BY Comments.timestamp ASC";
                         stmt = conn.prepareStatement(query);
+                        stmt.setInt(1, task);
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
                             String userID = user.getUsername();
-                            stmt.setString(1, userID);
                             stmt.setString(2, userID);
+                            stmt.setString(3, userID);
                         }
-                    } else if (kind.equals("user")) {
-                        String userID = request.getParameter("user");
-                        String requesterID = user.getUsername();
-                        query = "SELECT DISTINCT projectID, title, description, manager, isPublic, beginsAt, totalDuration FROM Projects WHERE projectID IN (SELECT projectID FROM ProjectHasUsers.username = ?";
-                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
-                            query += " AND (isPublic = 1";
-                            query += " OR projectID IN (SELECT projectID FROM ProjectHasUsers WHERE ProjectHasUsers.username = ?)";
-                            query += " OR manager = ?)";
-                        }
-                        query += " ORDER BY beginsAt ASC";
-                        stmt = conn.prepareStatement(query);
-                        stmt.setString(1, userID);
-                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
-                            stmt.setString(2, requesterID);
-                            stmt.setString(3, requesterID);
-                        }
-                    } else {
-                        validRequest = false;
-                        out.println("{\"error\":\"Wrong argument\"}");
-                    }
-                    if (validRequest) {
                         ResultSet results = stmt.executeQuery();
                         while (results.next())
-                            projects.add(new Project(results.getInt("projectID"), results.getString("title"), results.getString("description"),
-                                    results.getString("manager"), results.getDate("beginsAt"), results.getInt("totalDuration")));
-                        if (projects.isEmpty()) out.println("{}");
+                            comments.add(new Comment(results.getInt("commentID"), results.getString("content"), results.getString("username"),
+                                    results.getTimestamp("timestamp"), results.getInt("taskID")));
+                        if (comments.isEmpty()) out.println("{}");
                         else {
                             Gson gson = new Gson();
-                            String output = gson.toJson(projects, projects.getClass());
+                            String output = gson.toJson(comments, comments.getClass());
                             out.println(output);
                         }
-                    }
+                    } else throw new NumberFormatException();
                 } else {
                     out.println("{\"error\":\"Requesting user not logged in\"}");
                 }
-            }
-            catch(SQLException SQLe) {
+            } catch(SQLException SQLe) {
                 log("SQL error when logging in", SQLe);
+            } catch(NumberFormatException ne) {
+                out.println("{\"error\":\"Invalid task ID requested\"}");
             } finally {
                 try {
                     if (stmt != null) stmt.close();

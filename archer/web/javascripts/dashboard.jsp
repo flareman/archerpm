@@ -5,6 +5,7 @@ $(function() {
     prepareGetUsers();
     prepareGetProjects();
     prepareGetTasks();
+    prepareGetComments();
 });
 
 $(window).load(function() {
@@ -77,6 +78,80 @@ var prepareGetTasks = function() {
                 $('#result').html('<table><thead><tr><th>#</th><th>Task ID</th><th>Title</th><th>Priority</th><th>Start Date</th><th>Duration</th><th>Completed</th></tr></thead><tbody id="resultsBody"></tbody></table>');
                 $.each(data, function(i, task) {
                     $('#resultsBody').append("<tr>"+"<td>"+(i+1)+"</td><td>"+task.id+"</td><td>"+task.title+"</td><td>"+task.priority+"</td><td>"+task.startDate+"</td><td>"+task.duration+"</td><td>"+task.completed+"</td></tr>");
+                });
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $('#result').html(thrownError);
+        }
+        });
+        return false;
+    });
+}
+
+var prepareGetComments = function() {
+    $('#getComments1').click(function(e) {
+        e.preventDefault();
+        $.ajax({  
+        type: "POST",
+        url: "<%= response.encodeURL("dashboard/comments") %>",
+        data: {"task": "1"},
+        dataType: "json",
+        success: function(data) {
+            if (data.hasOwnProperty("error"))
+                $('#result').html(data.error);
+            else {
+                $('#result').html('<table><thead><tr><th>#</th><th>Comment ID</th><th>Content</th><th>User</th><th>Date/Time</th><th>Task</th></tr></thead><tbody id="resultsBody"></tbody></table>');
+                $.each(data, function(i, comment) {
+                    $('#resultsBody').append("<tr>"+"<td>"+(i+1)+"</td><td>"+comment.id+"</td><td>"+comment.content+"</td><td>"+comment.username+"</td><td>"+comment.timestamp+"</td><td>"+comment.task+"</td></tr>");
+                });
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $('#result').html(thrownError);
+        }
+        });
+        return false;
+    });
+
+    $('#getComments2').click(function(e) {
+        e.preventDefault();
+        $.ajax({  
+        type: "POST",
+        url: "<%= response.encodeURL("dashboard/comments") %>",
+        data: {"task": "2"},
+        dataType: "json",
+        success: function(data) {
+            if (data.hasOwnProperty("error"))
+                $('#result').html(data.error);
+            else {
+                $('#result').html('<table><thead><tr><th>#</th><th>Comment ID</th><th>Content</th><th>User</th><th>Date/Time</th><th>Task</th></tr></thead><tbody id="resultsBody"></tbody></table>');
+                $.each(data, function(i, comment) {
+                    $('#resultsBody').append("<tr>"+"<td>"+(i+1)+"</td><td>"+comment.id+"</td><td>"+comment.content+"</td><td>"+comment.username+"</td><td>"+comment.timestamp+"</td><td>"+comment.task+"</td></tr>");
+                });
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            $('#result').html(thrownError);
+        }
+        });
+        return false;
+    });
+
+    $('#getComments3').click(function(e) {
+        e.preventDefault();
+        $.ajax({  
+        type: "POST",
+        url: "<%= response.encodeURL("dashboard/comments") %>",
+        data: {"task": "3"},
+        dataType: "json",
+        success: function(data) {
+            if (data.hasOwnProperty("error"))
+                $('#result').html(data.error);
+            else {
+                $('#result').html('<table><thead><tr><th>#</th><th>Comment ID</th><th>Content</th><th>User</th><th>Date/Time</th><th>Task</th></tr></thead><tbody id="resultsBody"></tbody></table>');
+                $.each(data, function(i, comment) {
+                    $('#resultsBody').append("<tr>"+"<td>"+(i+1)+"</td><td>"+comment.id+"</td><td>"+comment.content+"</td><td>"+comment.username+"</td><td>"+comment.timestamp+"</td><td>"+comment.task+"</td></tr>");
                 });
             }
         },
