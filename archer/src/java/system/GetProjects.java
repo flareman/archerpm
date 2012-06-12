@@ -89,7 +89,7 @@ public class GetProjects extends HttpServlet {
                 }
             }
             catch(SQLException SQLe) {
-                log("SQL error when logging in", SQLe);
+                log("SQL error at GetProjects", SQLe);
             } finally {
                 try {
                     if (stmt != null) stmt.close();
