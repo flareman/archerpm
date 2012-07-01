@@ -1,7 +1,7 @@
 <%@page contentType="text/javascript" %>
 
 $(function() {
-    prepareSettings();
+    preparePage();
     prepareGetUsers();
     prepareGetProjects();
     prepareGetTasks();
@@ -163,27 +163,59 @@ var prepareGetComments = function() {
     });
 }
 
-var prepareSettings = function() {
-    $('#gear').hover(function() { $('.top.settings').addClass("hover"); },
-    function() {
-        if ($("#settings-menu").is(":visible") == false)
-            $('.top.settings.hover').removeClass("hover");
-    });
-    $('#gear').click(function(e) {
-        e.preventDefault();
-        $("#settings-menu").fadeToggle(100);
-        $("#gear").toggleClass("hover");
-    });
-    $('#settings-menu').click(function(e) { e.preventDefault(); });
-    $("#settings-menu").mouseup(function() { return false });
-    $(document).mouseup(function(e) {
-        if($(e.target).is("#gear") == false) {
-            $("#settings-menu").fadeOut(100);
-            $(".top.settings.hover").removeClass("hover");
-        }
-    });
+var preparePage = function() {
     $("#logout").click(function(e) {
         e.preventDefault();
         window.location.replace("<%= response.encodeURL("dashboard/logout") %>");
     });
+    loadUserProjects();
+}
+
+var loadUserProjects = function() {
+    $.ajax({  
+    type: "POST",
+    url: "<%= response.encodeURL("dashboard/projects") %>",
+    data: {"kind": "all"},
+    dataType: "json",
+    success: function(data) {
+        if (data.hasOwnProperty("error"))
+            $('<div/>').addClass('reveal-modal').html('<h2>Whoops!</h2><p>'+data.error+'</p><a class="close-reveal-modal">&#215;</a>').appendTo($('#modals')).reveal();
+        else {
+            var mine = 0;
+            var public = 0;
+            $.each(data, function(i, project) {
+                var plink = $("<li/>").append($('<a/>').addClass("projectlink").attr("href","#").attr("id",project.id).html(project.title).click(loadProject));
+                if (!project.isPublic) {
+                    if (mine > 0) return;
+                    mine++;
+                    $('#myprojects').append(plink);
+                } else {
+                    if (public > 9) return;
+                    public++;
+                    $('#publicprojects').append(plink);
+                }
+            });
+            if (mine === 0) $('#myprojects').append('<li class="disabled">No Projects</li>');
+            if (public === 0) $('#publicprojects').append('<li class="disabled">No Projects</li>');
+            if (mine > 0) $('#myprojects').append('<li><a href="#" class="moreprojects" id="mine">More of My Projects...</a></li>');
+            if (public > 9) $('#publicprojects').append('<li><a href="#" class="moreprojects" id="public">More Public Projects...</a></li>');
+            $('a.moreprojects').click(loadMoreProjects);
+        }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+        $('<div/>').addClass('reveal-modal').html('<h2>Whoops!</h2><p>'+thrownError+'</p><a class="close-reveal-modal">&#215;</a>').appendTo($('#modals')).reveal();
+    }
+    });
+}
+
+var loadProject = function(e) {
+    e.preventDefault();
+    alert("Project with ID: "+event.target.id+" clicked; load project placeholder!");
+    return false;
+}
+
+var loadMoreProjects = function(e) {
+    e.preventDefault();
+    alert(event.target.id);
+    return false;
 }

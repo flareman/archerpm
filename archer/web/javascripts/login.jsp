@@ -34,7 +34,7 @@ var submitLoginForm = function (){
         alertbox.hide();
         if (data.hasOwnProperty("error")) {
             alertbox.html(data.error);
-            alertbox.addClass("error");
+            alertbox.addClass("alert");
         }
         $("#loginResult").fadeOut(300, function() {
             if (data.hasOwnProperty("error")) {
@@ -45,7 +45,7 @@ var submitLoginForm = function (){
         $("#loginButton").removeAttr("disabled");
       },
       error: function(xhr, ajaxOptions, thrownError) {
-        var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","loginResult");
+        var alertbox = $("<div/>").addClass("alert-box alert").attr("id","loginResult");
         alertbox.hide();
         alertbox.html("Whoops, an error occured :( Please try again in a bit.");
         alertbox.addClass("warning");
@@ -72,7 +72,7 @@ var registerNewUser = function() {
         alertbox.hide();
         if (data.hasOwnProperty("error")) {
             alertbox.html(data.error);
-            alertbox.addClass("error");
+            alertbox.addClass("alert");
         } else {
             alertbox.html("Registered nicely! We'll take you back to the login page automatically in 3 seconds.");
             alertbox.addClass("success");
@@ -91,7 +91,7 @@ var registerNewUser = function() {
         var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","registerResult");
         alertbox.hide();
         alertbox.html("Whoops, an error occured :( Please try again in a bit.");
-        alertbox.addClass("warning");
+        alertbox.addClass("secondary");
         $("#registerResult").fadeOut(300, function() {
             $("#registerResult").replaceWith(alertbox);
             alertbox.fadeIn(400);
@@ -104,33 +104,32 @@ var registerNewUser = function() {
 
 function createRegForm() {
     // Create a new form for registration, along with all its elements
-    var regForm = $("<form />").addClass("nice").attr("id","regForm").
+    var regForm = $("<form />").attr("id","regForm").
         attr("action","#").attr("method","POST");
-    var msg = $("<p />").addClass("archer details").
-        html("Great! Please tell us a bit about yourself:");
+    var msg = $("<h5 />").addClass("subheader centertext").html("Great! Please tell us a bit about yourself:");
     var regResult = $("<div />").attr("id","registerResult");
-    var uname = $("<input />").addClass("input-text").attr("id","newUserID").
+    var uname = $("<input />").attr("id","newUserID").
         attr("placeholder","Username").attr("type","text").attr("name","newUserID").
         attr("required","required");
-    var pass = $("<input />").addClass("input-text").attr("id","newPassword").
+    var pass = $("<input />").attr("id","newPassword").
         attr("placeholder","Password").attr("type","password").
         attr("name","newPassword").attr("required","required");
-    var pass2 = $("<input />").addClass("input-text").attr("id","passcheck").
+    var pass2 = $("<input />").attr("id","passcheck").
         attr("placeholder","Confirm Password").attr("type","password").
         attr("name","passcheck").attr("required","");
-    var name = $("<input />").addClass("input-text").attr("id","name").
+    var name = $("<input />").attr("id","name").
         attr("placeholder","Name").attr("type","text").attr("name","name").
         attr("required","required");
-    var surname = $("<input />").addClass("input-text").attr("id","surname").
+    var surname = $("<input />").attr("id","surname").
         attr("placeholder","Surname").attr("type","text").attr("name","surname").
         attr("required","required");
-    var email = $("<input />").addClass("input-text").attr("id","email").
+    var email = $("<input />").attr("id","email").
         attr("placeholder","Email Address").attr("type","text").attr("name","email").
         attr("required","required");
-    var email2 = $("<input />").addClass("input-text").attr("id","email2").
+    var email2 = $("<input />").attr("id","email2").
         attr("placeholder","Confirm Email Address").attr("type","text").
         attr("name","email2").attr("required","required");
-    var regButton = $("<input />").addClass("nice radius blue button full-width").
+    var regButton = $("<input />").addClass("radius button expand").
         attr("id","registerButton").attr("type","submit").attr("value","Sign Up").attr("disabled", "disabled");
 
     // Append all registration elements to the form
@@ -161,12 +160,12 @@ function createRegForm() {
                 data: regForm.serialize(),
                 dataType: "json",
                 success: function(data) {
-                    var label = $("<label />").attr("for", "newUserID").addClass("userIDError");
+                    var label = $("<span />").attr("for", "newUserID").addClass("label userIDError");
                     if (data.hasOwnProperty("error")) {
-                        label.html("The username is taken; choose another").addClass("red");
+                        label.html("The username is taken; choose another").addClass("alert");
                         regForm.removeClass("userIDValid");
                     } else {
-                        label.html("Username not taken").addClass("green");
+                        label.html("Username not taken").addClass("success");
                         regForm.addClass("userIDValid");
                     }
                     if ($(".userIDError").exists())
@@ -180,7 +179,7 @@ function createRegForm() {
                 error: function(xhr, ajaxOptions, thrownError) {
                     regForm.removeClass("userIDValid");
                     toggleRegButton();
-                    var alertbox = $("<div/>").addClass("alert-box centertext warning").attr("id","registerResult");
+                    var alertbox = $("<div />").addClass("alert-box centertext secondary").attr("id","registerResult");
                     alertbox.html("Whoops, an error occured :( Please try again in a bit.").hide();
                     $("#registerResult").fadeOut(300, function() {
                         $("#registerResult").replaceWith(alertbox);
@@ -201,7 +200,7 @@ function createRegForm() {
             return;
         }
         
-        var label = $("<label />").addClass("red");
+        var label = $("<span />").addClass("label alert");
         if (isValidEmail(email.val())) {
             $("#emailError").fadeOut(200, function(){ $(this).remove(); });
             if (email.val() == email2.val()) {
@@ -241,7 +240,7 @@ function createRegForm() {
             return;
         }
         
-        var label = $("<label />").addClass("red");
+        var label = $("<span />").addClass("label alert");
         if (pass.val().length >= 6) {
             $("#passError").fadeOut(200, function(){ $(this).remove(); });
             if (pass.val() == pass2.val()) {

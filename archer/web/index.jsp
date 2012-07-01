@@ -13,11 +13,7 @@
 	<meta name="viewport" content="width=device-width" />
 	<title>Welcome to Archer</title>
 	<link rel="stylesheet" href="stylesheets/foundation.css">
-	<link rel="stylesheet" href="stylesheets/app.css">
 	<link rel="stylesheet" href="stylesheets/archer.css">
-	<!--[if lt IE 9]>
-		<link rel="stylesheet" href="stylesheets/ie.css">
-	<![endif]-->
 	<script src="javascripts/modernizr.foundation.js"></script>
 	<!--[if lt IE 9]>
 		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -25,7 +21,7 @@
 
 </head>
     <body>
-        <div class="container">
+        <div class="row full-height etched"><div class="twelve columns">
             <div class="row">
                 <div id="header" class="twelve columns centered">
                     <div class="row"><div class="four columns centered"><img id="logo" class="hidden" src="images/archer/archer_big.png" alt="Welcome to Archer"/></div></div>
@@ -36,28 +32,34 @@
             </div>
             <div class="row">
                 <div class="four columns centered">
-                    <div class="radius shadow panel">
-                        <div class="row">
-                            <form class="nice" id="loginForm" action="#" method="POST">
-                                <p class="archer details">Please enter your login info to start:</p>
-                                <div id="loginResult"></div>
-                                <input id="userID" class="input-text" required placeholder="Username" type="text" name="userID" /> 
-                                <input id="password" class="input-text" required placeholder="Password" type="password" name="password" />
-                                <input id="loginButton" type="submit" value="Login" disabled class="nice radius blue button full-width"></input>
-                                <label for="cookie"><input type="checkbox" name="cookie" id="cookie" /> Keep me logged in</label>
-                            </form>
-                            <a href="#" id="regPrompt"><p class="archer form details">New User? Click Here</p></a>
-                        </div>
+                    <div class="radius panel">
+                        <form id="loginForm" class="custom" action="#" method="POST">
+                            <h4 class="centertext subheader">Please log in to start using Archer:</h4>
+                            <div id="loginResult"></div>
+                            <input id="userID"required placeholder="Username" type="text" name="userID" />
+                            <input id="password" required placeholder="Password" type="password" name="password" />
+                            <label for="cookie" class="centertext">
+                                <input type="checkbox" id="cookie" style="display: none;">
+                                <span class="custom checkbox"></span> Keep me logged in
+                            </label>
+                            <br>
+                            <div class="row">
+                                <div class="eight columns centered">
+                                    <input id="loginButton" type="submit" value="Login" disabled class="radius button expand" />
+                                </div>
+                            </div>
+                        </form>
+                        <div class="row"><div class="twelve columns centertext"><a href="#" id="regPrompt">New User? Click Here</a></div></div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div></div>
     </body>
     <script src="javascripts/jquery.min.js"></script>
     <script src="javascripts/jquery.textchange.min.js"></script>
     <script src="javascripts/jquery.exists.js"></script>
     <script src="javascripts/foundation.js"></script>
-    <script src="javascripts/app.js"></script>
+    <!-- <script src="javascripts/app.js"></script> -->
     <script src="javascripts/util.jsp" type="text/javascript" language="JavaScript"></script>
     <script src="javascripts/login.jsp" type="text/javascript" language="JavaScript"></script>
 </html>

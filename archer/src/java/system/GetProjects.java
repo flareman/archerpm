@@ -76,7 +76,7 @@ public class GetProjects extends HttpServlet {
                         ResultSet results = stmt.executeQuery();
                         while (results.next())
                             projects.add(new Project(results.getInt("projectID"), results.getString("title"), results.getString("description"),
-                                    results.getString("manager"), results.getDate("beginsAt"), results.getInt("totalDuration")));
+                                    results.getString("manager"), results.getDate("beginsAt"), results.getInt("totalDuration"), results.getBoolean("isPublic")));
                         if (projects.isEmpty()) out.println("{}");
                         else {
                             Gson gson = new Gson();

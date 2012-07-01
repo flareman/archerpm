@@ -58,8 +58,8 @@ public class PerformLogin extends HttpServlet {
                                 cookie.setMaxAge(365*24*60*60);
                                 response.addCookie(cookie);
                             }
-                        } else out.println("{\"error\":\"Please enter your username and password.\"}");
-                    } else out.println("{\"error\":\"Your username or password is incorrect. Please, try again.\"}");
+                        } else out.println("{\"error\":\"Your username or password is incorrect. Please, try again.\"}");
+                    } else out.println("{\"error\":\"Please enter your username and password.\"}");
                 }
             } catch (SQLException SQLe) {
                 log("SQL error when logging in", SQLe);
