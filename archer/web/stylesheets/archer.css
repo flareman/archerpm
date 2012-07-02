@@ -10,8 +10,8 @@ body {
     height: 100%;
 }
 
-.row.full-height {
-    min-height: 100%;
+.row.full-height, .row.footer {
+    min-height: 95%;
     padding-left: 30px;
     padding-right: 30px;
     border-left: 8px groove #234;
@@ -24,6 +24,15 @@ body {
    -webkit-box-shadow:0 0 100px 70px rgba(0, 0, 0, 0.5);
    -moz-box-shadow:0 0 100px 70px rgba(0, 0, 0, 0.5);
    box-shadow:0 0 100px 70px rgba(0, 0, 0, 0.5);
+}
+
+.row.footer {
+    height: 5%;
+    min-height: 50px;
+   -webkit-box-shadow: none;
+   -moz-box-shadow: none;
+   box-shadow: none;
+   padding-bottom: 5px;
 }
 
 #header.columns {
@@ -69,7 +78,7 @@ a.blocklink {
     background-image: url('../images/archer/toplogo.png');
 }
 
-ul.side-nav li.disabled {
+li.disabled {
     color: #BBB;
 }
 
@@ -79,4 +88,31 @@ div.panel.large.radius {
   -ms-border-radius: 8px;
   -o-border-radius: 8px;
   border-radius: 8px;
+}
+
+.copyright {
+    padding: 5px 10px 5px 10px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+    border-radius: 8px;
+    background-color: rgba(0,0,0,0.4);
+    color: #FFF;
+    opacity: .05;
+   transition: opacity .3s linear;
+   -moz-transition: opacity .3s linear;
+   -webkit-transition: opacity .3s linear;
+}
+
+.copyright:hover {
+    opacity: .4;
+}
+
+span.loader {
+    background-repeat: no-repeat;
+    background-color: transparent;
+    display: inline-block;
+    background-image: url('../images/archer/ajax-loader.gif');
+    height: 11px; width: 16px;
 }

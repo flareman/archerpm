@@ -31,7 +31,7 @@
             </div>
             <div class="row">
                 <div class="three columns">
-                    <div class="panel radius">
+                    <div class="panel large radius">
                         <ul class="side-nav">
                             <li id="myprojects"><h6>My Projects</h6></li>
                             <li class="divider"></li>
@@ -43,17 +43,20 @@
                     </div>
                 </div>
                 <div class="nine columns">
-                    <div class="panel" id="content">
+                    <div class="panel radius" id="content">
                     </div>
                 </div>
             </div>
-        </div></div><div id="modals"></div>
+        </div></div>
+        <div class="row footer etched"><div class="twelve columns">
+                <div class="row"><div class="six columns centered"><p class="centertext copyright">Spyridon Smparounis, George Papakyriakopoulos © 2012</p></div></div>
+        </div></div>
+        <div id="modals"></div>
     </body>
     <script src="javascripts/jquery.min.js"></script>
     <script src="javascripts/jquery.textchange.min.js"></script>
     <script src="javascripts/jquery.exists.js"></script>
     <script src="javascripts/foundation.js"></script>
-   <!--  <script src="javascripts/app.js"></script> -->
     <script src="javascripts/util.jsp" type="text/javascript" language="JavaScript"></script>
     <script src="javascripts/dashboard.jsp" type="text/javascript" language="JavaScript"></script>
 </html>

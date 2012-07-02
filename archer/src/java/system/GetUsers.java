@@ -45,7 +45,7 @@ public class GetUsers extends HttpServlet {
                             validRequest = false;
                         }
                     } else if (kind.equals("task")) {
-                        Integer task = Integer.parseInt(request.getParameter("task"));
+                        Integer task = Integer.parseInt(request.getParameter("value"));
                         query = "SELECT Projects.isPublic, Projects.projectID FROM Projects, Tasks WHERE Tasks.projectID = Projects.projectID AND Tasks.taskID = ?";
                         stmt = conn.prepareStatement(query);
                         stmt.setInt(1, task);
@@ -72,13 +72,13 @@ public class GetUsers extends HttpServlet {
                             }
                         }
                         if (validRequest) {
-                            query = "SELECT DISTINCT username, name, surname, email, description AS status FROM Users, TaskHasUsers, Status WHERE TaskHasUsers.taskID = ? AND Users.username = TaskHasUsers.username AND Status.statusID = Users.status ORDER BY surname ASC";
+                            query = "SELECT DISTINCT Users.username, name, surname, email, description AS status FROM Users, TaskHasUsers, Status WHERE TaskHasUsers.taskID = ? AND Users.username = TaskHasUsers.username AND Status.statusID = Users.status ORDER BY surname ASC";
                             stmt.close();
                             stmt = conn.prepareStatement(query);
                             stmt.setInt(1, task);
                         }
                     } else if (kind.equals("project")) {
-                        Integer project = Integer.parseInt(request.getParameter("project"));
+                        Integer project = Integer.parseInt(request.getParameter("value"));
                         query = "SELECT isPublic FROM Projects WHERE projectID = ?";
                         stmt = conn.prepareStatement(query);
                         stmt.setInt(1, project);
@@ -103,25 +103,38 @@ public class GetUsers extends HttpServlet {
                             }
                         }
                         if (validRequest) {
-                            query = "SELECT DISTINCT username, name, surname, email, description AS status FROM Users, ProjectHasUsers, Status WHERE ProjectHasUsers.projectID = ? AND Users.username = ProjectHasUsers.username AND Status.statusID = Users.status ORDER BY surname ASC";
+                            query = "SELECT DISTINCT Users.username, name, surname, email, description AS status FROM Users, ProjectHasUsers, Status WHERE ProjectHasUsers.projectID = ? AND Users.username = ProjectHasUsers.username AND Status.statusID = Users.status ORDER BY surname ASC";
                             stmt.close();
                             stmt = conn.prepareStatement(query);
                             stmt.setInt(1, project);
                         }
+                    } else if (kind.equals("user")) {
+                        String username = request.getParameter("value");
+                        query = "SELECT DISTINCT username, name, surname, email, description AS status FROM Users, Status WHERE Users.username = ? AND Status.statusID = Users.status";
+                        stmt = conn.prepareStatement(query);
+                        stmt.setString(1, username);
                     } else {
                         validRequest = false;
                         out.println("{\"error\":\"Wrong argument\"}");
                     }
                     if (validRequest) {
                         ResultSet results = stmt.executeQuery();
-                        while (results.next())
-                            users.add(new User(results.getString("username"), results.getString("name"),
-                                results.getString("surname"), results.getString("email"), results.getString("status")));
-                        if (users.isEmpty()) out.println("{}");
-                        else {
-                            Gson gson = new Gson();
-                            String output = gson.toJson(users, users.getClass());
-                            out.println(output);
+                        if (kind.equals("user")) {
+                            if (results.next()) {
+                                User result = new User(results.getString("username"), results.getString("name"),
+                                        results.getString("surname"), results.getString("email"), results.getString("status"));
+                                out.println(new Gson().toJson(result, result.getClass()));
+                            } else out.println("{}");
+                        } else {
+                            while (results.next())
+                                users.add(new User(results.getString("username"), results.getString("name"),
+                                    results.getString("surname"), results.getString("email"), results.getString("status")));
+                            if (users.isEmpty()) out.println("{}");
+                            else {
+                                Gson gson = new Gson();
+                                String output = gson.toJson(users, users.getClass());
+                                out.println(output);
+                            }
                         }
                     }
                 } else {

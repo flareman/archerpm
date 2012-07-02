@@ -39,8 +39,8 @@
                             <input id="userID"required placeholder="Username" type="text" name="userID" />
                             <input id="password" required placeholder="Password" type="password" name="password" />
                             <label for="cookie" class="centertext">
-                                <input type="checkbox" id="cookie" style="display: none;">
-                                <span class="custom checkbox"></span> Keep me logged in
+                                <input type="checkbox" id="cookie" name="cookie" style="display: none;">
+                                <span id="cookieCbx" class="custom checkbox"></span> Keep me logged in
                             </label>
                             <br>
                             <div class="row">
@@ -54,12 +54,14 @@
                 </div>
             </div>
         </div></div>
+        <div class="row footer etched"><div class="twelve columns">
+                <div class="row"><div class="six columns centered"><p class="centertext copyright">Spyridon Smparounis, George Papakyriakopoulos © 2012</p></div></div>
+        </div></div>
     </body>
     <script src="javascripts/jquery.min.js"></script>
     <script src="javascripts/jquery.textchange.min.js"></script>
     <script src="javascripts/jquery.exists.js"></script>
     <script src="javascripts/foundation.js"></script>
-    <!-- <script src="javascripts/app.js"></script> -->
     <script src="javascripts/util.jsp" type="text/javascript" language="JavaScript"></script>
     <script src="javascripts/login.jsp" type="text/javascript" language="JavaScript"></script>
 </html>

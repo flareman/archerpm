@@ -45,7 +45,7 @@ public class GetTasks extends HttpServlet {
                         String requesterID = user.getUsername();
                         stmt.setString(1, requesterID);
                     } else if (kind.equals("user")) {
-                        String userID = request.getParameter("user");
+                        String userID = request.getParameter("value");
                         String requesterID = user.getUsername();
                         query = "SELECT DISTINCT Tasks.taskID, Tasks.title, Tasks.description, Priorities.description AS priority, Tasks.projectID, Tasks.completed, Tasks.duration, Tasks.beginsAt, Tasks.endedAt FROM Tasks, Priorities, TaskHasUsers WHERE Priorities.priorityID = Tasks.priority";
                         query += " AND Tasks.taskID IN (SELECT taskID FROM TaskHasUsers WHERE username = ?)";
@@ -64,7 +64,7 @@ public class GetTasks extends HttpServlet {
                             stmt.setString(3, requesterID);
                         }
                     } else if (kind.equals("project")) {
-                        String projectID = request.getParameter("project");
+                        String projectID = request.getParameter("value");
                         String requesterID = user.getUsername();
                         query = "SELECT DISTINCT Tasks.taskID, Tasks.title, Tasks.description, Priorities.description AS priority, Tasks.projectID, Tasks.completed, Tasks.duration, Tasks.beginsAt, Tasks.endedAt FROM Tasks, Priorities WHERE Priorities.priorityID = Tasks.priority";
                         query += " AND Tasks.projectID = ?";
@@ -82,20 +82,47 @@ public class GetTasks extends HttpServlet {
                             stmt.setString(2, requesterID);
                             stmt.setString(3, requesterID);
                         }
+                    } else if (kind.equals("task")) {
+                        Integer taskID = Integer.parseInt(request.getParameter("value"));
+                        String requesterID = user.getUsername();
+                        query = "SELECT DISTINCT Tasks.taskID, Tasks.title, Tasks.description, Priorities.description AS priority, Tasks.projectID, Tasks.completed, Tasks.duration, Tasks.beginsAt, Tasks.endedAt FROM Tasks, Priorities WHERE Priorities.priorityID = Tasks.priority";
+                        query += " AND Tasks.taskID = ?";
+                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
+                            query += " AND (";
+                            query += "Tasks.projectID IN (SELECT projectID FROM Projects WHERE isPublic = 1)";
+                            query += " OR Tasks.projectID IN (SELECT Projects.projectID FROM Projects, ProjectHasUsers WHERE ProjectHasUsers.username = ?)";
+                            query += " OR Tasks.projectID IN (SELECT projectID FROM Projects WHERE manager = ?)";
+                            query += ")";
+                        }
+                        query += " ORDER BY Tasks.beginsAt ASC";
+                        stmt = conn.prepareStatement(query);
+                        stmt.setInt(1, taskID);
+                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
+                            stmt.setString(2, requesterID);
+                            stmt.setString(3, requesterID);
+                        }
                     } else {
                         validRequest = false;
                         out.println("{\"error\":\"Wrong argument\"}");
                     }
                     if (validRequest) {
                         ResultSet results = stmt.executeQuery();
-                        while (results.next())
-                            tasks.add(new Task(results.getInt("taskID"), results.getString("title"), results.getString("description"), results.getString("priority"),
-                                    results.getDate("beginsAt"), results.getDate("endedAt"), results.getInt("duration"), results.getBoolean("completed")));
-                        if (tasks.isEmpty()) out.println("{}");
-                        else {
-                            Gson gson = new Gson();
-                            String output = gson.toJson(tasks, tasks.getClass());
-                            out.println(output);
+                        if (kind.equals("task")) {
+                            if (results.next()) {
+                                Task result = new Task(results.getInt("taskID"), results.getString("title"), results.getString("description"), results.getString("priority"),
+                                        results.getDate("beginsAt"), results.getDate("endedAt"), results.getInt("duration"), results.getBoolean("completed"));
+                                out.println(new Gson().toJson(result, result.getClass()));
+                            } else out.println("{}");
+                        } else {
+                            while (results.next())
+                                tasks.add(new Task(results.getInt("taskID"), results.getString("title"), results.getString("description"), results.getString("priority"),
+                                        results.getDate("beginsAt"), results.getDate("endedAt"), results.getInt("duration"), results.getBoolean("completed")));
+                            if (tasks.isEmpty()) out.println("{}");
+                            else {
+                                Gson gson = new Gson();
+                                String output = gson.toJson(tasks, tasks.getClass());
+                                out.println(output);
+                            }
                         }
                     }
                 } else {

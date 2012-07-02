@@ -24,6 +24,7 @@ $(window).load(function() {
 
 var submitLoginForm = function (){
     $("#loginButton").attr("disabled", "disabled");
+    $("#loginButton").attr("value", "Logging in...");
     $.ajax({  
       type: "POST",
       dataType: "json",
@@ -43,6 +44,7 @@ var submitLoginForm = function (){
             } else window.location.replace("<%= response.encodeURL("dashboard") %>");
         });
         $("#loginButton").removeAttr("disabled");
+        $("#loginButton").attr("value", "Login");
       },
       error: function(xhr, ajaxOptions, thrownError) {
         var alertbox = $("<div/>").addClass("alert-box alert").attr("id","loginResult");
@@ -55,6 +57,7 @@ var submitLoginForm = function (){
             if (r.result === "OK") alertbox.delay(2000).fadeOut();
         });
         $("#loginButton").removeAttr("disabled");
+        $("#loginButton").attr("value", "Login");
       }
     });
     return false;  
