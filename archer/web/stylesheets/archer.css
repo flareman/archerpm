@@ -72,3 +72,11 @@ a.blocklink {
 ul.side-nav li.disabled {
     color: #BBB;
 }
+
+div.panel.large.radius {
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+  border-radius: 8px;
+}

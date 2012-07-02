@@ -168,54 +168,66 @@ var preparePage = function() {
         e.preventDefault();
         window.location.replace("<%= response.encodeURL("dashboard/logout") %>");
     });
-    loadUserProjects();
+    loadSideNav();
 }
 
-var loadUserProjects = function() {
+var loadProject = function(kind, value, startFrom, count) {
+    var result;
     $.ajax({  
     type: "POST",
     url: "<%= response.encodeURL("dashboard/projects") %>",
-    data: {"kind": "all"},
+    data: {"kind": kind, "value": value, "startFrom": startFrom, "count": count},
     dataType: "json",
+    async: false,
     success: function(data) {
         if (data.hasOwnProperty("error"))
-            $('<div/>').addClass('reveal-modal').html('<h2>Whoops!</h2><p>'+data.error+'</p><a class="close-reveal-modal">&#215;</a>').appendTo($('#modals')).reveal();
-        else {
-            var mine = 0;
-            var public = 0;
-            $.each(data, function(i, project) {
-                var plink = $("<li/>").append($('<a/>').addClass("projectlink").attr("href","#").attr("id",project.id).html(project.title).click(loadProject));
-                if (!project.isPublic) {
-                    if (mine > 0) return;
-                    mine++;
-                    $('#myprojects').append(plink);
-                } else {
-                    if (public > 9) return;
-                    public++;
-                    $('#publicprojects').append(plink);
-                }
-            });
-            if (mine === 0) $('#myprojects').append('<li class="disabled">No Projects</li>');
-            if (public === 0) $('#publicprojects').append('<li class="disabled">No Projects</li>');
-            if (mine > 0) $('#myprojects').append('<li><a href="#" class="moreprojects" id="mine">More of My Projects...</a></li>');
-            if (public > 9) $('#publicprojects').append('<li><a href="#" class="moreprojects" id="public">More Public Projects...</a></li>');
-            $('a.moreprojects').click(loadMoreProjects);
-        }
+            ;// $('<div/>').addClass('reveal-modal').html('<h2>Whoops!</h2><p>'+data.error+'</p><a class="close-reveal-modal">&#215;</a>').appendTo($('#modals')).reveal();
+        else result = data;
     },
     error: function(xhr, ajaxOptions, thrownError) {
-        $('<div/>').addClass('reveal-modal').html('<h2>Whoops!</h2><p>'+thrownError+'</p><a class="close-reveal-modal">&#215;</a>').appendTo($('#modals')).reveal();
+        // $('<div/>').addClass('reveal-modal').html('<h2>Whoops!</h2><p>'+thrownError+'</p><a class="close-reveal-modal">&#215;</a>').appendTo($('#modals')).reveal();
     }
     });
+    return result;
 }
 
-var loadProject = function(e) {
-    e.preventDefault();
-    alert("Project with ID: "+event.target.id+" clicked; load project placeholder!");
-    return false;
+var loadSideNav = function() {
+    var data = loadProject("all");
+    var mine = 0;
+    var public = 0;
+    $.each(data, function(i, project) {
+        var plink = $("<li/>").append($('<a/>').addClass("projectlink").attr("href","#").attr("id",project.id).html(project.title).click(viewProject));
+        if (!project.isPublic) {
+            if (mine > 0) { mine = -1; return }
+            mine++;
+            $('#myprojects').append(plink);
+        } else {
+            if (public > 0) { public = -1; return }
+            public++;
+            $('#publicprojects').append(plink);
+        }
+    });
+    if (mine === 0) $('#myprojects').append('<li class="disabled">No Projects</li>');
+    if (public === 0) $('#publicprojects').append('<li class="disabled">No Projects</li>');
+    if (mine === -1) $('#myprojects').append('<li><a href="#" class="moreprojects" id="mine">All my projects...</a></li>');
+    if (public === -1) $('#publicprojects').append('<li><a href="#" class="moreprojects" id="public">All public projects...</a></li>');
+    $('.moreprojects').click(viewAllProjects);
 }
 
-var loadMoreProjects = function(e) {
-    e.preventDefault();
-    alert(event.target.id);
-    return false;
+var viewProject = function(projectID) {
+    project = loadProject("project", event.target.id);
+    $('#content').html(project.title);
+}
+
+var viewAllProjects = function() {
+    var data = loadProject("all");
+    var type = event.target.id;
+    $('#content').html('<ul class="disc" id="projectlist"></ul>');
+    $.each(data, function(i, project) {
+        var plink = $("<li/>").append($('<a/>').addClass("projectlink").attr("href","#").attr("id",project.id).html(project.title));
+        plink.click(viewProject);
+        if ((project.isPublic && type === "public") || (!project.isPublic && type === "mine")) {
+            $('#projectlist').append(plink);
+        }
+    });
 }

@@ -32,9 +32,9 @@
             </div>
             <div class="row">
                 <div class="four columns centered">
-                    <div class="radius panel">
+                    <div class="large radius panel">
                         <form id="loginForm" class="custom" action="#" method="POST">
-                            <h4 class="centertext subheader">Please log in to start using Archer:</h4>
+                            <h5 class="centertext subheader">Log in to start using Archer:</h4>
                             <div id="loginResult"></div>
                             <input id="userID"required placeholder="Username" type="text" name="userID" />
                             <input id="password" required placeholder="Password" type="password" name="password" />

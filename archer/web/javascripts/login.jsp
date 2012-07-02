@@ -106,7 +106,7 @@ function createRegForm() {
     // Create a new form for registration, along with all its elements
     var regForm = $("<form />").attr("id","regForm").
         attr("action","#").attr("method","POST");
-    var msg = $("<h5 />").addClass("subheader centertext").html("Great! Please tell us a bit about yourself:");
+    var msg = $("<h5 />").addClass("subheader centertext").html("Great! Tell us a bit about you:");
     var regResult = $("<div />").attr("id","registerResult");
     var uname = $("<input />").attr("id","newUserID").
         attr("placeholder","Username").attr("type","text").attr("name","newUserID").

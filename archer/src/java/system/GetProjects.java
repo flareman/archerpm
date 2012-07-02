@@ -37,6 +37,10 @@ public class GetProjects extends HttpServlet {
                     boolean validRequest = true;
                     ArrayList<Project> projects = new ArrayList<Project>();
                     String kind = request.getParameter("kind");
+                    String temp = request.getParameter("startFrom");
+                    Integer startFrom = (temp == null)?null:Integer.parseInt(temp);
+                    temp = request.getParameter("count");
+                    Integer count = (temp == null)?null:Integer.parseInt(temp);
                     if (kind.equals("all")) {
                         query = "SELECT DISTINCT projectID, title, description, manager, isPublic, beginsAt, totalDuration FROM Projects";
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
@@ -45,14 +49,22 @@ public class GetProjects extends HttpServlet {
                             query += " OR manager = ?";
                         }
                         query += " ORDER BY beginsAt ASC";
+                        if (startFrom != null && count != null) query += " LIMIT ?, ?";
                         stmt = conn.prepareStatement(query);
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
                             String userID = user.getUsername();
                             stmt.setString(1, userID);
                             stmt.setString(2, userID);
+                            if (startFrom != null && count != null) {
+                                stmt.setInt(3, startFrom);
+                                stmt.setInt(4, count);
+                            }
+                        } else if (startFrom != null && count != null) {
+                            stmt.setInt(1, startFrom);
+                            stmt.setInt(2, count);
                         }
                     } else if (kind.equals("user")) {
-                        String userID = request.getParameter("user");
+                        String userID = request.getParameter("value");
                         String requesterID = user.getUsername();
                         query = "SELECT DISTINCT projectID, title, description, manager, isPublic, beginsAt, totalDuration FROM Projects WHERE (projectID IN (SELECT projectID FROM ProjectHasUsers WHERE username = ?) OR manager = ?)";
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
@@ -61,9 +73,33 @@ public class GetProjects extends HttpServlet {
                             query += " OR manager = ?)";
                         }
                         query += " ORDER BY beginsAt ASC";
+                        if (startFrom != null && count != null) query += " LIMIT ?, ?";
                         stmt = conn.prepareStatement(query);
                         stmt.setString(1, userID);
                         stmt.setString(2, userID);
+                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
+                            stmt.setString(3, requesterID);
+                            stmt.setString(4, requesterID);
+                            if (startFrom != null && count != null) {
+                                stmt.setInt(5, startFrom);
+                                stmt.setInt(6, count);
+                            }
+                        } else if (startFrom != null && count != null) {
+                            stmt.setInt(3, startFrom);
+                            stmt.setInt(4, count);
+                        }
+                    } else if (kind.equals("project")) {
+                        Integer projectID = Integer.parseInt(request.getParameter("value"));
+                        String requesterID = user.getUsername();
+                        query = "SELECT DISTINCT projectID, title, description, manager, isPublic, beginsAt, totalDuration FROM Projects WHERE projectID = ?";
+                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
+                            query += " AND (isPublic = 1";
+                            query += " OR projectID IN (SELECT projectID FROM ProjectHasUsers WHERE ProjectHasUsers.username = ?)";
+                            query += " OR manager = ?)";
+                        }
+                        query += " ORDER BY beginsAt ASC";
+                        stmt = conn.prepareStatement(query);
+                        stmt.setInt(1, projectID);
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
                             stmt.setString(3, requesterID);
                             stmt.setString(4, requesterID);
@@ -74,14 +110,22 @@ public class GetProjects extends HttpServlet {
                     }
                     if (validRequest) {
                         ResultSet results = stmt.executeQuery();
-                        while (results.next())
-                            projects.add(new Project(results.getInt("projectID"), results.getString("title"), results.getString("description"),
-                                    results.getString("manager"), results.getDate("beginsAt"), results.getInt("totalDuration"), results.getBoolean("isPublic")));
-                        if (projects.isEmpty()) out.println("{}");
-                        else {
-                            Gson gson = new Gson();
-                            String output = gson.toJson(projects, projects.getClass());
-                            out.println(output);
+                        if (kind.equals("project")) {
+                            if (results.next()) {
+                                Project requestedProject = new Project(results.getInt("projectID"), results.getString("title"), results.getString("description"),
+                                        results.getString("manager"), results.getDate("beginsAt"), results.getInt("totalDuration"), results.getBoolean("isPublic"));
+                                out.println(new Gson().toJson(requestedProject, requestedProject.getClass()));
+                            } else out.println("{\"error\":\"Requested project not found\"}");
+                        } else {
+                            while (results.next())
+                                projects.add(new Project(results.getInt("projectID"), results.getString("title"), results.getString("description"),
+                                        results.getString("manager"), results.getDate("beginsAt"), results.getInt("totalDuration"), results.getBoolean("isPublic")));
+                            if (projects.isEmpty()) out.println("{}");
+                            else {
+                                Gson gson = new Gson();
+                                String output = gson.toJson(projects, projects.getClass());
+                                out.println(output);
+                            }
                         }
                     }
                 } else {
