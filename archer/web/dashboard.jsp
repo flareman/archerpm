@@ -2,6 +2,7 @@
 <%@ page import="util.Toolbox" %>
 <%@ page import="data.User" %>
 <% User currentUser = (User)request.getSession().getAttribute("user"); %>
+<% String base = request.getContextPath(); %>
 
 <!DOCTYPE html>
 
@@ -15,9 +16,9 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width" />
 	<title>Archer - Dashboard</title>
-	<link rel="stylesheet" href="stylesheets/foundation.css">
-	<link rel="stylesheet" href="stylesheets/archer.css">
-	<script src="javascripts/modernizr.foundation.js"></script>
+	<link rel="stylesheet" href="<%=base%>/stylesheets/foundation.css">
+	<link rel="stylesheet" href="<%=base%>/stylesheets/archer.css">
+	<script src="<%=base%>/javascripts/modernizr.foundation.js"></script>
 	<!--[if lt IE 9]>
 		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
@@ -33,6 +34,8 @@
                 <div class="three columns">
                     <div class="panel large radius">
                         <ul class="side-nav">
+                            <li><a href="#" id="home"><h5>Home</h5></a></li>
+                            <li class="divider"></li>
                             <li id="myprojects"><h6>My Projects</h6></li>
                             <li class="divider"></li>
                             <li id="publicprojects"><h6>Public Projects</h6></li>
@@ -53,10 +56,10 @@
         </div></div>
         <div id="modals"></div>
     </body>
-    <script src="javascripts/jquery.min.js"></script>
-    <script src="javascripts/jquery.textchange.min.js"></script>
-    <script src="javascripts/jquery.exists.js"></script>
-    <script src="javascripts/foundation.js"></script>
-    <script src="javascripts/util.jsp" type="text/javascript" language="JavaScript"></script>
-    <script src="javascripts/dashboard.jsp" type="text/javascript" language="JavaScript"></script>
+    <script src="<%=base%>/javascripts/jquery.min.js"></script>
+    <script src="<%=base%>/javascripts/jquery.textchange.min.js"></script>
+    <script src="<%=base%>/javascripts/jquery.exists.js"></script>
+    <script src="<%=base%>/javascripts/foundation.js"></script>
+    <script src="<%=base%>/javascripts/util.jsp" type="text/javascript" language="JavaScript"></script>
+    <script src="<%=base%>/javascripts/dashboard.jsp?path=<%= request.getPathInfo() %>" type="text/javascript" language="JavaScript"></script>
 </html>

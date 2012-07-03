@@ -1,4 +1,5 @@
 <%@page contentType="text/javascript" %>
+<% String base = request.getContextPath(); %>
 
 $(function() {
     // Event handlers for login form and register prompt
@@ -28,7 +29,7 @@ var submitLoginForm = function (){
     $.ajax({  
       type: "POST",
       dataType: "json",
-      url: "<%= response.encodeURL("login") %>",  
+      url: "<%= response.encodeURL(base+"/login") %>",  
       data: $(this).serialize(),
       success: function(data) {
         var alertbox = $("<div/>").addClass("alert-box centertext").attr("id","loginResult");
@@ -41,7 +42,7 @@ var submitLoginForm = function (){
             if (data.hasOwnProperty("error")) {
                 $("#loginResult").replaceWith(alertbox);
                 alertbox.fadeIn(400);
-            } else window.location.replace("<%= response.encodeURL("dashboard") %>");
+            } else window.location.replace("<%= response.encodeURL(base+"/dashboard") %>");
         });
         $("#loginButton").removeAttr("disabled");
         $("#loginButton").attr("value", "Login");
@@ -67,7 +68,7 @@ var registerNewUser = function() {
     $("#registerButton").attr("disabled", "disabled");
     $.ajax({  
       type: "POST",  
-      url: "<%= response.encodeURL("register") %>",  
+      url: "<%= response.encodeURL(base+"/register") %>",  
       data: $(this).serialize(),
       dataType: "json",
       success: function(data) {
@@ -159,7 +160,7 @@ function createRegForm() {
         } else timeout = setTimeout(function(){
             $.ajax({  
                 type: "POST",  
-                url: "<%= response.encodeURL("check") %>",  
+                url: "<%= response.encodeURL(base+"/check") %>",  
                 data: regForm.serialize(),
                 dataType: "json",
                 success: function(data) {

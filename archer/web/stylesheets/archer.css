@@ -78,6 +78,10 @@ a.blocklink {
     background-image: url('../images/archer/toplogo.png');
 }
 
+.top.logo:hover {
+    cursor: pointer;
+}
+
 li.disabled {
     color: #BBB;
 }
