@@ -98,7 +98,7 @@ var viewProject = function(e, projectID) {
     if (e != null) {
         e.preventDefault();
         projectID = e.target.id;
-        $('li a#'+projectID+'.projectlink').append(' <span class="loader" id="loader'+event.target.id+'"></span>');
+        $('li a#'+projectID+'.projectlink').append(' <span class="loader" id="loader'+e.target.id+'"></span>');
     }
     loadProject(function(project){
         $('#content').html('\
