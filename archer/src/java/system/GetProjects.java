@@ -101,8 +101,8 @@ public class GetProjects extends HttpServlet {
                         stmt = conn.prepareStatement(query);
                         stmt.setInt(1, projectID);
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
+                            stmt.setString(2, requesterID);
                             stmt.setString(3, requesterID);
-                            stmt.setString(4, requesterID);
                         }
                     } else {
                         validRequest = false;
