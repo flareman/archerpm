@@ -97,13 +97,34 @@ var viewProject = function(projectID, allowBack) {
             </div>\
             <h5 class="subheader" id="manager">Managed by </h5>\
             <h6 class="subheader" id="workers"></h6>\
-            <hr/>\
-            <dl class="tabs pill" id="taskfilter">\
-            <dd class="active" id="alltasks"><a href="#">All Tasks</a></dd>\
-            <dd id="pendingtasks"><a href="#">Pending</a></dd>\
-            <dd id="completetasks"><a href="#">Complete</a></dd>\
+            <dl class="tabs">\
+            <dd class="active" id="tasks"><a href="#tasks">Tasks</a></dd>\
+            <dd id="employees"><a href="#employees">Employees</a></dd>\
             </dl>\
-            <ul class="dash" id="tasklist"></ul>');
+            <ul class="tabs-content">\
+            <li class="active" id="tasksTab">\
+                <dl class="pill tabs" id="taskfilter">\
+                <dd class="active" id="alltasks"><a href="#">All Tasks</a></dd>\
+                <dd id="pendingtasks"><a href="#">Pending</a></dd>\
+                <dd id="completetasks"><a href="#">Complete</a></dd>\
+                </dl>\
+                <ul class="dash" id="tasklist"></ul>\
+            </li>\
+            <li id="employeesTab">\
+                <ul class="block-grid three-up" id="employeelist">\
+                </ul>\
+            </li>\
+            </ul>');
+        $('dl.tabs dd a', content).click(function(e) {
+            e.preventDefault();
+            var $tab = $(this).parent('dd');
+            var $activeTab = $tab.closest('dl').find('dd.active'),
+                contentLocation = $tab.children('a').attr("href") + 'Tab';
+            $activeTab.removeClass('active');
+            $tab.addClass('active');
+            $(contentLocation).closest('.tabs-content').children('li').removeClass('active').hide();
+            $(contentLocation).css('display', 'block').addClass('active');
+        });
         $('#title', content).prepend(project.title);
         $('#back', content).click(function(e) {
             e.preventDefault();
@@ -152,11 +173,21 @@ var viewProject = function(projectID, allowBack) {
             $('#workers', content).append("There");
             switch (data.length) {
                 case 0: $('#workers', content).append(" are no employees"); break;
-                case 1: $('#workers', content).append(' is <a href="#/project/employees/'+project.id+'" class="workerlink">one employee</a>'); break;
-                default: $('#workers', content).append(' are <a href="#/project/employees/'+project.id+'" class="workerlink">'+data.length+' employees</a>'); break;
+                case 1: $('#workers', content).append(' is <a href="#" class="workerlink">one employee</a>'); break;
+                default: $('#workers', content).append(' are <a href="#" class="workerlink">'+data.length+' employees</a>'); break;
             }
             $('#workers', content).append(" assigned to this project.");
-            $('.workerlink', content).address();
+            $('.workerlink', content).click(function(e) {
+                e.preventDefault();
+                $('#tasks', content).removeClass('active');
+                $('#employees', content).addClass('active');
+                $('#tasksTab', content).removeClass('active').hide();
+                $('#employeesTab', content).css('display', 'block').addClass('active');
+            });
+            $.each(data, function(i, user) {
+                var userlink = $('<a href="#/user/'+user.username+'"/>').html(user.name+' '+user.surname).address();
+                $('#employeelist', content).append($('<li/>').append(userlink));
+            });
             if (--stepsRemaining == 0) {
                 $('#content').replaceWith(content);
                 $.address.title('Archer - Dashboard - '+project.title);
