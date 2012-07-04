@@ -1,11 +1,13 @@
+<%@page import="data.User"%>
 <%@page contentType="text/javascript" %>
+<%@ page import="data.User" %>
 <% String base = request.getContextPath(); %>
+<% User currentUser = (User)request.getSession().getAttribute("user"); %>
 
 $(function() {
     preparePage();
 });
 
-var view404 = function () { window.location.replace("<%= response.encodeURL(base+"/notfound.jsp") %>"); }
 var preparePage = function() {
     $("#logout").click(function(e) {
         e.preventDefault();
@@ -48,6 +50,8 @@ var handleAddressEvent = function (event, allowBack) {
     } else view404();
 }
 
+var view404 = function () { window.location.replace("<%= response.encodeURL(base+"/notfound.jsp") %>"); }
+
 var loadSideNav = function() {
     $('.side-nav.projects').html('');
     $('.side-nav.projects').append('<li><h6>Projects</h6></li><li class="disabled projectindicator">Loading&hellip; <span class="loader"></span></li><li class="divider"></li>');
@@ -55,7 +59,7 @@ var loadSideNav = function() {
         var mine = 0;
         var public = 0;
         $('.projectindicator').remove();
-        $('.side-nav.projects').html('<li><h6>My Projects</h6></li>\
+        $('.side-nav.projects').html('<li><h6><%= (currentUser.getStatus()==User.Status.ADMINISTRATOR)?"All":"My" %> Projects</h6></li>\
             <li class="divider" id="end-myprojects"></li>\
             <li><h6>Public Projects</h6></li>\
             <li class="divider" id="end-publicprojects"></li>');
@@ -73,7 +77,7 @@ var loadSideNav = function() {
         });
         if (mine === 0) $('#end-myprojects').before('<li class="disabled">None</li>');
         if (public === 0) $('#end-publicprojects').before('<li class="disabled">None</li>');
-        if (mine === -1) $('#end-myprojects').before('<li><a href="#/mine" class="moreprojects" id="mine">All my projects&hellip;</a></li>');
+        if (mine === -1) $('#end-myprojects').before('<li><a href="#/mine" class="moreprojects" id="mine">All <%= (currentUser.getStatus()==User.Status.ADMINISTRATOR)?"":"all" %> projects&hellip;</a></li>');
         if (public === -1) $('#end-publicprojects').before('<li><a href="#/public" class="moreprojects" id="public">All public projects&hellip;</a></li>');
         $('.moreprojects').address();
     },
@@ -81,40 +85,28 @@ var loadSideNav = function() {
 }
 
 var viewProject = function(projectID, allowBack) {
-    $('#content').html('<h3 class="subheader">Loading&hellip;</h3><span class="loader"></span>');
+    var content = createBasicContentPanel(allowBack);
     loadProject(function(project){
-        var content = $('<div class="panel radius" id="content"/>').html('\
-            <div class="row">'+((allowBack)?'\
-                <div class="two columns"><a href="#" class="radius secondary button" id="back">Back</a></div>\
-                <div class="eight columns"><h3 id="title"> <span class="radius label" id="publicstatus"></span></h3></div>':'\
-                <div class="ten columns"><h3 id="title"> <span class="radius label" id="publicstatus"></span></h3></div>')+'\
-                <div class="two column"><a href="#" class="radius button" id="edit">Edit</a></div>\
-            </div>\
-            <div class="row">\
-                '+((allowBack)?'<div class="two columns"></div>\
-                <div class="eight columns">':'<div class="ten columns">')+'<h4 class="subheader" id="description"></h4></div>\
-                <div class="two column"></div>\
-            </div>\
-            <h5 class="subheader" id="manager">Managed by </h5>\
-            <h6 class="subheader" id="workers"></h6>\
-            <dl class="tabs">\
-            <dd class="active" id="tasks"><a href="#tasks">Tasks</a></dd>\
-            <dd id="employees"><a href="#employees">Employees</a></dd>\
+        content.append('<h5 class="subheader" id="manager">Managed by </h5>\
+        <h6 class="subheader" id="workers"></h6>\
+        <dl class="tabs">\
+        <dd class="active" id="tasks"><a href="#tasks">Tasks</a></dd>\
+        <dd id="employees"><a href="#employees">Employees</a></dd>\
+        </dl>\
+        <ul class="tabs-content">\
+        <li class="active" id="tasksTab">\
+            <dl class="pill tabs" id="taskfilter">\
+            <dd class="active" id="alltasks"><a href="#">All Tasks</a></dd>\
+            <dd id="pendingtasks"><a href="#">Pending</a></dd>\
+            <dd id="completetasks"><a href="#">Complete</a></dd>\
             </dl>\
-            <ul class="tabs-content">\
-            <li class="active" id="tasksTab">\
-                <dl class="pill tabs" id="taskfilter">\
-                <dd class="active" id="alltasks"><a href="#">All Tasks</a></dd>\
-                <dd id="pendingtasks"><a href="#">Pending</a></dd>\
-                <dd id="completetasks"><a href="#">Complete</a></dd>\
-                </dl>\
-                <ul class="dash" id="tasklist"></ul>\
-            </li>\
-            <li id="employeesTab">\
-                <ul class="block-grid three-up" id="employeelist">\
-                </ul>\
-            </li>\
-            </ul>');
+            <ul class="dash" id="tasklist"></ul>\
+        </li>\
+        <li id="employeesTab">\
+            <ul class="block-grid three-up" id="employeelist">\
+            </ul>\
+        </li>\
+        </ul>');
         $('dl.tabs dd a', content).click(function(e) {
             e.preventDefault();
             var $tab = $(this).parent('dd');
@@ -126,11 +118,7 @@ var viewProject = function(projectID, allowBack) {
             $(contentLocation).css('display', 'block').addClass('active');
         });
         $('#title', content).prepend(project.title);
-        $('#back', content).click(function(e) {
-            e.preventDefault();
-            window.history.back();
-        });
-        $('#publicstatus', content).prepend((project.isPublic)?"Public":"Private");
+        $('#title', content).append(' ').append($('<span class="radius label" id="publicstatus"/>').html((project.isPublic)?"Public":"Private"));
         $('#description', content).prepend(project.description);
         $('#pendingtasks', content).click(function(e) {
             e.preventDefault();
@@ -172,9 +160,11 @@ var viewProject = function(projectID, allowBack) {
             $('.workersindicator', content).remove();
             $('#workers', content).append("There");
             switch (data.length) {
-                case 0: $('#workers', content).append(" are no employees"); break;
                 case 1: $('#workers', content).append(' is <a href="#" class="workerlink">one employee</a>'); break;
-                default: $('#workers', content).append(' are <a href="#" class="workerlink">'+data.length+' employees</a>'); break;
+                default:
+                    if (typeof data.length == 'undefined') $('#workers', content).append(" are no employees");
+                    else $('#workers', content).append(' are <a href="#" class="workerlink">'+data.length+' employees</a>');
+                    break;
             }
             $('#workers', content).append(" assigned to this project.");
             $('.workerlink', content).click(function(e) {
@@ -204,15 +194,100 @@ var viewProject = function(projectID, allowBack) {
     }, "project", projectID);
 }
 
-var viewTask = function(taskID, allowBack) {
-    $.address.title('Archer - Dashboard - Task '+taskID);
-    alert(taskID);
+var viewUser = function(username, allowBack) {
+    var content = createBasicContentPanel(allowBack);
+    loadUser(function(user){
+        $('#title', content).html(user.name+' '+user.surname);
+        $('#description', content).prepend($('<a href="mailto:'+user.email+'"/>').html(user.email));
+        content.append($(''));
+        loadProject(function(data){
+            content.append('<hr/><h5 class="subheader" id="projectnum">'+user.name+' '+user.surname+' is </h5>');
+            content.append($('<ul class="disc" id="projectlist"/>'));
+            switch (data.length) {
+                case 1: $('#projectnum', content).append('a member of one project.'); break;
+                default:
+                    if (typeof data.length == 'undefined') $('#projectnum', content).append('not a member of any projects.');
+                    else $('#projectnum', content).append('a member of '+data.length+' projects');
+                    break;
+            }
+            $.each(data, function(i, project) {
+                var plink = $('<a href="#/project/'+project.id+'" class="projectlink"/>').address();
+                plink.append($('<li/>').html(project.title));
+                $('#projectlist', content).append(plink);
+            });
+            $('#content').replaceWith(content);
+            $.address.title('Archer - Dashboard - '+user.name+' '+user.surname);
+        }, "user", user.username);
+    }, "user", username);
 }
 
-var viewUser = function(username, allowBack) {
-    $.address.title('Archer - Dashboard - User '+username);
-    alert(username);
+var viewTask = function(taskID, allowBack) {
+    var content = createBasicContentPanel(allowBack);
+    loadTask(function(task){
+        $('#title', content).html(task.title+" ");
+        if (task.completed) $('#title', content).addClass('done');
+        $('#title', content).append('<span class="radius label" id="priority"/>');
+        switch (task.priority) {
+            case "LOW":
+                $('#priority', content).html("Low priority");
+                $('#priority', content).addClass("success");
+                break;
+            case "MEDIUM":
+                $('#priority', content).html("Medium priority");
+                $('#priority', content).addClass("secondary");
+                break;
+            case "HIGH":
+                $('#priority', content).html("High priority");
+                break;
+            case "URGENT":
+                $('#priority', content).html("Urgent");
+                $('#priority', content).addClass("alert");
+                break;
+            case "CRITICAL":
+                $('#priority', content).html("CRITICAL");
+                $('#priority', content).addClass("alert");
+                break;
+            default:
+                $('#priority', content).remove();
+                break;
+        }
+        $('#description', content).prepend(task.description);
+        content.append('<h5 class="subheader" id="projectnum">This task is part of the <a href="#/project/'+task.project+'" id="projectname"></a> project.</h5>');
+        $('#projectname', content).address();
+        content.append('<hr/><h4 class="subheader">Task Details</h4>');
+        content.append('<ul class="block-grid two-up" id="taskdetails"></ul>');
+        $('#taskdetails', content).append('<li>Start Date: '+task.startDate+'</li>');
+        $('#taskdetails', content).append('<li>Est. Duration: '+task.duration+'</li>');
+        if (task.completed) {
+            $('#taskdetails', content).append('<li>Completion Date: '+task.endDate+'</li>');
+            $('#taskdetails', content).append('<li>Real Duration: '+task.realDuration+'</li>');
+        } else {
+            $('#taskdetails', content).append('<li>Est. Completion Date: '+task.approxEndDate+'</li>');
+        }
+        content.append('<hr/><h4 class="subheader">Discussion</h4>');
+        var stepsRemaining = 2;
+        loadProject(function(project){
+            $('#projectname', content).html(project.title);
+            if (--stepsRemaining == 0) {
+                $('#content').replaceWith(content);
+                $.address.title('Archer - Dashboard - '+task.title);
+            }
+        }, "project", task.project);
+        loadComments(function(data){
+            content.append($('<div id="comments"/>'));
+            $.each(data, function(i, comment) {
+                $("#comments", content).append($('<blockquote/>').html(comment.content+'<cite><a class="commenter" href="#/user/'+comment.username+'">'+comment.fullname+'</a> on '+comment.timestamp+'</cite>'));
+            });
+            $('a.commenter', content).address();
+            $("#comments", content).append('<form id="newcomment" action="#" method="post"><div class="row collapse"><div class="ten columns"><input type="text" name="content" placeholder="Type your comment here" id="content"/></div><div class="two columns"><input type="submit" class="postfix button" value="Post"/></div></div></form>');
+            if (--stepsRemaining == 0) {
+                $('#content').replaceWith(content);
+                $.address.title('Archer - Dashboard - '+task.title);
+            }
+        }, task.id);
+    }, "task", taskID);
 }
+
 
 var viewLanding = function() {
     $.address.title('Archer - Dashboard');
@@ -231,6 +306,27 @@ var viewAllProjects = function(type, allowBack) {
         $.address.title("Archer - Dashboard - All "+((type=="mine")?"My":"Public")+" Projects");
     },
     "all");
+}
+
+var createBasicContentPanel = function(allowBack) {
+    $('#content').html('<h3 class="subheader">Loading&hellip;</h3><span class="loader"></span>');
+    var result = $('<div class="panel radius" id="content"/>').html('\
+        <div class="row">'+((allowBack)?'\
+            <div class="two columns"><a href="#" class="radius secondary button" id="back">Back</a></div>\
+            <div class="eight columns"><h3 id="title"></h3></div>':'\
+            <div class="ten columns"><h3 id="title"></h3></div>')+'\
+            <div class="two column"><a href="#" class="radius button" id="edit">Edit</a></div>\
+        </div>\
+        <div class="row">\
+            '+((allowBack)?'<div class="two columns"></div>\
+            <div class="eight columns">':'<div class="ten columns">')+'<h4 class="subheader" id="description"></h4></div>\
+            <div class="two column"></div>\
+        </div>');
+        if (allowBack) $('#back', result).click(function(e) {
+            e.preventDefault();
+            window.history.back();
+        });
+        return result;
 }
 
 var loadProject = function(implement, kind, value, startFrom, count) {
@@ -284,11 +380,11 @@ var loadUser = function(implement, kind, value) {
     });
 }
 
-var loadComments = function(implement, kind, value) {
+var loadComments = function(implement, task) {
     $.ajax({  
     type: "POST",
     url: "<%= response.encodeURL(base+"/dashboard/comments") %>",
-    data: {"kind": kind, "value": value},
+    data: {"task": task},
     dataType: "json",
     success: function(data) {
         if (data.hasOwnProperty("error"))

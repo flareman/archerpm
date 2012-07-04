@@ -124,7 +124,7 @@ public class GetUsers extends HttpServlet {
                                 User result = new User(results.getString("username"), results.getString("name"),
                                         results.getString("surname"), results.getString("email"), results.getString("status"));
                                 out.println(new Gson().toJson(result, result.getClass()));
-                            } else out.println("{}");
+                            } else out.println("{\"error\":\"Requested user not found\"}");
                         } else {
                             while (results.next())
                                 users.add(new User(results.getString("username"), results.getString("name"),

@@ -36,8 +36,8 @@ public class GetComments extends HttpServlet {
                     ArrayList<Comment> comments = new ArrayList<Comment>();
                     Integer task = Integer.parseInt(request.getParameter("task"));
                     if (task >= 0) {
-                        String query = "SELECT DISTINCT Comments.commentID, Comments.content, Comments.timestamp, Comments.username, Comments.taskID";
-                        query += " FROM Comments, Tasks, Projects, ProjectHasUsers WHERE Comments.taskID = Tasks.taskID";
+                        String query = "SELECT DISTINCT Comments.commentID, Comments.content, Comments.timestamp, Comments.username, CONCAT(Users.name,' ',Users.surname) AS fullname, Comments.taskID";
+                        query += " FROM Comments, Tasks, Projects, ProjectHasUsers, Users WHERE Comments.taskID = Tasks.taskID AND Comments.username = Users.username";
                         query += " AND Comments.taskID = ? AND Tasks.projectID = Projects.projectID AND Projects.projectID = ProjectHasUsers.projectID";
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
                             query += " AND (";
@@ -56,7 +56,7 @@ public class GetComments extends HttpServlet {
                         }
                         ResultSet results = stmt.executeQuery();
                         while (results.next())
-                            comments.add(new Comment(results.getInt("commentID"), results.getString("content"), results.getString("username"),
+                            comments.add(new Comment(results.getInt("commentID"), results.getString("content"), results.getString("username"), results.getString("fullname"),
                                     results.getTimestamp("timestamp"), results.getInt("taskID")));
                         if (comments.isEmpty()) out.println("{}");
                         else {

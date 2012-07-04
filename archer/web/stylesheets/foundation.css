@@ -315,11 +315,6 @@ blockquote cite:before {
   content: "\2014 \0020";
 }
 
-/* line 56, /var/www/foundation_generator/shared/bundle/ruby/1.9.1/bundler/gems/foundation-a6e45645cf38/stylesheets/foundation/typography.scss */
-blockquote cite a, blockquote cite a:visited {
-  color: #555;
-}
-
 /* line 58, /var/www/foundation_generator/shared/bundle/ruby/1.9.1/bundler/gems/foundation-a6e45645cf38/stylesheets/foundation/typography.scss */
 abbr, acronym {
   text-transform: uppercase;

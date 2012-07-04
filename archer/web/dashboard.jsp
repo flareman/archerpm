@@ -38,7 +38,7 @@
                             <li class="divider"></li>
                             <ul class="side-nav projects">
                             </ul>
-                            <li><a href="#/settings" class="" id="userSettings">Settings</a></li>
+                            <li><a href="#/user/<%= currentUser.getUsername() %>" class="" id="userSettings">My Profile</a></li>
                             <li><a href="<%=base%>" class="" id="logout">Logout</a></li>
                         </ul>
                     </div>

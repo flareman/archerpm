@@ -122,3 +122,8 @@ span.loader {
     background-image: url('../images/archer/ajax-loader.gif');
     height: 11px; width: 16px;
 }
+
+#content h3.done {
+    text-decoration: line-through;
+    color: #999;
+}

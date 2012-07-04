@@ -109,15 +109,15 @@ public class GetTasks extends HttpServlet {
                         ResultSet results = stmt.executeQuery();
                         if (kind.equals("task")) {
                             if (results.next()) {
-                                Task result = new Task(results.getInt("taskID"), results.getString("title"), results.getString("description"), results.getString("priority"),
+                                Task result = new Task(results.getInt("taskID"), results.getString("title"), results.getString("description"), results.getInt("projectID"), results.getString("priority"),
                                         results.getDate("beginsAt"), results.getDate("endedAt"), results.getInt("duration"), results.getBoolean("completed"));
                                 out.println(new Gson().toJson(result, result.getClass()));
                             } else out.println("{}");
                         } else {
                             while (results.next())
-                                tasks.add(new Task(results.getInt("taskID"), results.getString("title"), results.getString("description"), results.getString("priority"),
+                                tasks.add(new Task(results.getInt("taskID"), results.getString("title"), results.getString("description"), results.getInt("projectID"), results.getString("priority"),
                                         results.getDate("beginsAt"), results.getDate("endedAt"), results.getInt("duration"), results.getBoolean("completed")));
-                            if (tasks.isEmpty()) out.println("{}");
+                            if (tasks.isEmpty()) out.println("{\"error\":\"Requested task not found\"}");
                             else {
                                 Gson gson = new Gson();
                                 String output = gson.toJson(tasks, tasks.getClass());
