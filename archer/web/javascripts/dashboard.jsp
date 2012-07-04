@@ -1,228 +1,206 @@
 <%@page contentType="text/javascript" %>
-<%
-    String base = request.getContextPath();
-    String type = "";
-    String value = "";
-    if (request.getParameter("path") != null) {
-        String[] pathInfo = request.getParameter("path").split("/");
-        if (pathInfo.length == 3) {
-            type = pathInfo[1];
-            if (type.equals("project") || type.equals("task") || type.equals("user")) {
-                type = pathInfo[1];
-                value = pathInfo[2];
-            } else type = "";
-        }
-    }
-%>
+<% String base = request.getContextPath(); %>
 
 $(function() {
     preparePage();
-    <%= (type.equals("project")?"viewProject(null, '"+value+"');":"") %>
-    <%= (type.equals("task")?"viewProject(null, '"+value+"');":"") %>
-    <%= (type.equals("user")?"viewProject(null, '"+value+"');":"") %>
-    <%= (type.equals("")?"viewLanding()":"") %>
-    prepareGetComments();
 });
 
-var prepareGetComments = function() {
-    $('#getComments1').click(function(e) {
-        e.preventDefault();
-        $.ajax({  
-        type: "POST",
-        url: "<%= response.encodeURL(base+"/dashboard/comments") %>",
-        data: {"task": "1"},
-        dataType: "json",
-        success: function(data) {
-            if (data.hasOwnProperty("error"))
-                $('#result').html(data.error);
-            else {
-                $('#result').html('<table><thead><tr><th>#</th><th>Comment ID</th><th>Content</th><th>User</th><th>Date/Time</th><th>Task</th></tr></thead><tbody id="resultsBody"></tbody></table>');
-                $.each(data, function(i, comment) {
-                    $('#resultsBody').append("<tr>"+"<td>"+(i+1)+"</td><td>"+comment.id+"</td><td>"+comment.content+"</td><td>"+comment.username+"</td><td>"+comment.timestamp+"</td><td>"+comment.task+"</td></tr>");
-                });
-            }
-        },
-        error: function(xhr, ajaxOptions, thrownError) {
-            $('#result').html(thrownError);
-        }
-        });
-        return false;
-    });
-}
-
+var view404 = function () { window.location.replace("<%= response.encodeURL(base+"/notfound.jsp") %>"); }
 var preparePage = function() {
     $("#logout").click(function(e) {
         e.preventDefault();
         window.location.replace("<%= response.encodeURL(base+"/dashboard/logout") %>");
+        return false;
     });
-    $("#home").click(function(e) {
-        e.preventDefault();
-        viewLanding();
-    });
-    $(".logo").click(function(e) {
-        e.preventDefault();
-        viewLanding();
-    });
+    $("a.home").address();
     loadSideNav();
+    $.address.strict(false);
+    $.address.init(function(event) {
+    }).internalChange(function(event) {
+        handleAddressEvent(event, true);
+    }).externalChange(function(event) {
+        handleAddressEvent(event, false);
+    });
+}
+
+var handleAddressEvent = function (event, allowBack) {
+    if (event.pathNames.length == 0) viewLanding();
+    else if (event.pathNames.length == 1) {
+        switch (event.pathNames[0]) {
+            case "mine": viewAllProjects(event.pathNames[0], allowBack); break;
+            case "public": viewAllProjects(event.pathNames[0], allowBack); break;
+            default: view404(); break;
+        }
+    } else if (event.pathNames.length == 2) {
+        switch (event.pathNames[0]) {
+            case "project": viewProject(event.pathNames[1], allowBack); break;
+            case "task": viewTask(event.pathNames[1], allowBack); break;
+            case "user": viewUser(event.pathNames[1], allowBack); break;
+            default: view404(); break;
+        }
+    } else if (event.pathNames.length == 3) {
+        switch (event.pathNames[0]) {
+            default: view404(); break;
+        }
+    } else view404();
 }
 
 var loadSideNav = function() {
-    $('#myprojects').append('<li class="disabled projectindicator">Loading...</li>');
-    $('#publicprojects').append('<li class="disabled projectindicator">Loading...</li>');
+    $('.side-nav.projects').html('');
+    $('.side-nav.projects').append('<li><h6>Projects</h6></li><li class="disabled projectindicator">Loading&hellip; <span class="loader"></span></li><li class="divider"></li>');
     loadProject(function(data) {
         var mine = 0;
         var public = 0;
         $('.projectindicator').remove();
+        $('.side-nav.projects').html('<li><h6>My Projects</h6></li>\
+            <li class="divider" id="end-myprojects"></li>\
+            <li><h6>Public Projects</h6></li>\
+            <li class="divider" id="end-publicprojects"></li>');
         $.each(data, function(i, project) {
-            var plink = $("<li/>").append($('<a/>').addClass("projectlink").attr("href","#").attr("id",project.id).html(project.title).click(viewProject));
+            var plink = $("<li/>").append($('<a/>').addClass("projectlink").attr("id","project"+project.id).attr("href","#/project/"+project.id).html(project.title).address());
             if (!project.isPublic) {
                 if (mine > 9) { mine = -1; return }
                 mine++;
-                $('#myprojects').append(plink);
+                $('#end-myprojects').before(plink);
             } else {
                 if (public > 9) { public = -1; return }
                 public++;
-                $('#publicprojects').append(plink);
+                $('#end-publicprojects').append(plink);
             }
         });
-        if (mine === 0) $('#myprojects').append('<li class="disabled">No Projects</li>');
-        if (public === 0) $('#publicprojects').append('<li class="disabled">No Projects</li>');
-        if (mine === -1) $('#myprojects').append('<li><a href="#" class="moreprojects" id="mine">All my projects...</a></li>');
-        if (public === -1) $('#publicprojects').append('<li><a href="#" class="moreprojects" id="public">All public projects...</a></li>');
-        $('.moreprojects').click(viewAllProjects);
+        if (mine === 0) $('#end-myprojects').before('<li class="disabled">None</li>');
+        if (public === 0) $('#end-publicprojects').before('<li class="disabled">None</li>');
+        if (mine === -1) $('#end-myprojects').before('<li><a href="#/mine" class="moreprojects" id="mine">All my projects&hellip;</a></li>');
+        if (public === -1) $('#end-publicprojects').before('<li><a href="#/public" class="moreprojects" id="public">All public projects&hellip;</a></li>');
+        $('.moreprojects').address();
     },
     "all");
 }
 
-var viewProject = function(e, projectID) {
-    if (e != null) {
-        e.preventDefault();
-        projectID = e.target.id;
-        $('li a#'+projectID+'.projectlink').append(' <span class="loader" id="loader'+e.target.id+'"></span>');
-    }
+var viewProject = function(projectID, allowBack) {
+    $('#content').html('<h3 class="subheader">Loading&hellip;</h3><span class="loader"></span>');
     loadProject(function(project){
-        $('#content').html('\
-            <div class="row">\
+        var content = $('<div class="panel radius" id="content"/>').html('\
+            <div class="row">'+((allowBack)?'\
                 <div class="two columns"><a href="#" class="radius secondary button" id="back">Back</a></div>\
-                <div class="eight columns"><h3 id="title"> <span class="radius label" id="publicstatus"></span></h3></div>\
+                <div class="eight columns"><h3 id="title"> <span class="radius label" id="publicstatus"></span></h3></div>':'\
+                <div class="ten columns"><h3 id="title"> <span class="radius label" id="publicstatus"></span></h3></div>')+'\
                 <div class="two column"><a href="#" class="radius button" id="edit">Edit</a></div>\
             </div>\
             <div class="row">\
-                <div class="two columns"></div>\
-                <div class="eight columns"><h4 class="subheader" id="description"></h4></div>\
+                '+((allowBack)?'<div class="two columns"></div>\
+                <div class="eight columns">':'<div class="ten columns">')+'<h4 class="subheader" id="description"></h4></div>\
                 <div class="two column"></div>\
             </div>\
-            <h5 class="subheader" id="manager">Managed by <span class="disabled managerindicator">&hellip;</span></h5>\
-            <h6 class="subheader" id="workers"><span class="disabled workersindicator">Loading...</span></h6>\
+            <h5 class="subheader" id="manager">Managed by </h5>\
+            <h6 class="subheader" id="workers"></h6>\
             <hr/>\
             <dl class="tabs pill" id="taskfilter">\
             <dd class="active" id="alltasks"><a href="#">All Tasks</a></dd>\
             <dd id="pendingtasks"><a href="#">Pending</a></dd>\
             <dd id="completetasks"><a href="#">Complete</a></dd>\
             </dl>\
-            <ul class="dash" id="tasklist"><li class="disabled taskindicator">Loading...</li>\
-            </ul>');
-        $('#title').prepend(project.title);
-        $('#publicstatus').prepend((project.isPublic)?"Public":"Private");
-        $('#description').prepend(project.description);
-        $('#pendingtasks').click(function(e) {
+            <ul class="dash" id="tasklist"></ul>');
+        $('#title', content).prepend(project.title);
+        $('#back', content).click(function(e) {
             e.preventDefault();
-            $('#alltasks').removeClass("active");
-            $('#completetasks').removeClass("active");
-            $('#pendingtasks').addClass("active");
-            $('#tasklist li.done').hide();
-            $('#tasklist li.pending').show();
-            return false;
+            window.history.back();
         });
-        $('#completetasks').click(function(e) {
+        $('#publicstatus', content).prepend((project.isPublic)?"Public":"Private");
+        $('#description', content).prepend(project.description);
+        $('#pendingtasks', content).click(function(e) {
             e.preventDefault();
-            $('#alltasks').removeClass("active");
-            $('#pendingtasks').removeClass("active");
-            $('#completetasks').addClass("active");
-            $('#tasklist li.done').show();
-            $('#tasklist li.pending').hide();
-            return false;
+            $('#alltasks', content).removeClass("active");
+            $('#completetasks', content).removeClass("active");
+            $('#pendingtasks', content).addClass("active");
+            $('#tasklist li.done', content).hide();
+            $('#tasklist li.pending', content).show();
         });
-        $('#alltasks').click(function(e) {
+        $('#completetasks', content).click(function(e) {
             e.preventDefault();
-            $('#pendingtasks').removeClass("active");
-            $('#completetasks').removeClass("active");
-            $('#alltasks').addClass("active");
-            $('#tasklist li.done').show();
-            $('#tasklist li.pending').show();
-            return false;
+            $('#alltasks', content).removeClass("active");
+            $('#pendingtasks', content).removeClass("active");
+            $('#completetasks', content).addClass("active");
+            $('#tasklist li.done', content).show();
+            $('#tasklist li.pending', content).hide();
         });
+        $('#alltasks', content).click(function(e) {
+            e.preventDefault();
+            $('#pendingtasks', content).removeClass("active");
+            $('#completetasks', content).removeClass("active");
+            $('#alltasks', content).addClass("active");
+            $('#tasklist li.done, content').show();
+            $('#tasklist li.pending, content').show();
+        });
+        var stepsRemaining = 3;
         loadTask(function(data){
-            $('.taskindicator').remove();
             $.each(data, function(i, task) {
-                var tlink = $('<a href="#" class="tasklink"/>').attr("id", task.id).click(viewTask);
+                var tlink = $('<a href="#/task/'+task.id+'" class="tasklink"/>').address();
                 tlink.append($('<li/>').addClass((task.completed)?"done":"pending").html(task.title));
-                $('#tasklist').append(tlink);
+                $('#tasklist', content).append(tlink);
             });
+            if (--stepsRemaining == 0) {
+                $('#content').replaceWith(content);
+                $.address.title('Archer - Dashboard - '+project.title);
+            }
         }, "project", project.id);
         loadUser(function(data){
-            $('.workersindicator').remove();
-            $('#workers').append("There");
+            $('.workersindicator', content).remove();
+            $('#workers', content).append("There");
             switch (data.length) {
-                case 0: $('#workers').append(" are no employees"); break;
-                case 1: $('#workers').append(' is <a href="#" class="workerlink">one employee</a>'); break;
-                default: $('#workers').append(' are <a href="#" class="workerlink">'+data.length+' employees</a>'); break;
+                case 0: $('#workers', content).append(" are no employees"); break;
+                case 1: $('#workers', content).append(' is <a href="#/project/employees/'+project.id+'" class="workerlink">one employee</a>'); break;
+                default: $('#workers', content).append(' are <a href="#/project/employees/'+project.id+'" class="workerlink">'+data.length+' employees</a>'); break;
             }
-            $('#workers').append(" assigned to this project.");
-            $('.workerlink').attr("id",project.id).click(viewProjectUsers);
+            $('#workers', content).append(" assigned to this project.");
+            $('.workerlink', content).address();
+            if (--stepsRemaining == 0) {
+                $('#content').replaceWith(content);
+                $.address.title('Archer - Dashboard - '+project.title);
+            }
         }, "project", project.id);
         loadUser(function(user){
-            $('.managerindicator').remove();
-            $('#manager').append($('<a class="managerlink" href="#"/>').attr("id", user.username).html(user.name+' '+user.surname).click(viewUser));
+            $('.managerindicator', content).remove();
+            $('#manager', content).append($('<a class="managerlink" href="#/user/'+user.username+'"/>').html(user.name+' '+user.surname).address());
+            if (--stepsRemaining == 0) {
+                $('#content').replaceWith(content);
+                $.address.title('Archer - Dashboard - '+project.title);
+            }
         }, "user", project.manager);
-        $('span#loader'+project.id).remove();
     }, "project", projectID);
-    return false;
 }
 
-var viewTask = function(e) {
-    if (e != null) e.preventDefault();
-    alert(e.target.parentElement.id);
-    return false;
+var viewTask = function(taskID, allowBack) {
+    $.address.title('Archer - Dashboard - Task '+taskID);
+    alert(taskID);
 }
 
-var viewUser = function(e) {
-    if (e != null) e.preventDefault();
-    alert(e.target.id);
-    return false;
+var viewUser = function(username, allowBack) {
+    $.address.title('Archer - Dashboard - User '+username);
+    alert(username);
 }
 
-var viewProjectUsers = function(e) {
-    if (e != null) e.preventDefault();
-    alert(e.target.id);
-    return false;
-}
-
-var viewLanding = function(e) {
-    if (e != null) e.preventDefault();
+var viewLanding = function() {
+    $.address.title('Archer - Dashboard');
     $('#content').html('<h3>Great! <small>No work today :-)</small></h3>');
-    return false;
 }
 
-var viewAllProjects = function(e) {
-    if (e != null) e.preventDefault();
-    var type = event.target.id;
+var viewAllProjects = function(type, allowBack) {
     loadProject(function(data) {
         $('#content').html('<ul class="disc" id="projectlist"></ul>');
         $.each(data, function(i, project) {
-            var plink = $("<li/>").append($('<a/>').addClass("projectlink").attr("href","#").attr("id",project.id).html(project.title));
-            plink.click(viewProject);
+            var plink = $("<li/>").append($('<a/>').addClass("projectlink").attr("href","#/project/"+project.id).html(project.title).address());
             if ((project.isPublic && type === "public") || (!project.isPublic && type === "mine")) {
                 $('#projectlist').append(plink);
             }
         });
+        $.address.title("Archer - Dashboard - All "+((type=="mine")?"My":"Public")+" Projects");
     },
     "all");
-    return false;
 }
 
 var loadProject = function(implement, kind, value, startFrom, count) {
-    $.ajax({  
+    $.ajax({
     type: "POST",
     url: "<%= response.encodeURL(base+"/dashboard/projects") %>",
     data: {"kind": kind, "value": value, "startFrom": startFrom, "count": count},
@@ -259,6 +237,23 @@ var loadUser = function(implement, kind, value) {
     $.ajax({  
     type: "POST",
     url: "<%= response.encodeURL(base+"/dashboard/users") %>",
+    data: {"kind": kind, "value": value},
+    dataType: "json",
+    success: function(data) {
+        if (data.hasOwnProperty("error"))
+            $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
+        else implement(data);
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+        $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
+    }
+    });
+}
+
+var loadComments = function(implement, kind, value) {
+    $.ajax({  
+    type: "POST",
+    url: "<%= response.encodeURL(base+"/dashboard/comments") %>",
     data: {"kind": kind, "value": value},
     dataType: "json",
     success: function(data) {

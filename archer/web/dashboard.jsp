@@ -27,21 +27,19 @@
     <body>
         <div class="row full-height etched"><div class="twelve columns">
             <div class="top row">
-                <div class="three columns top logo"></div>
+                <div class="three columns top logo"><a href="#" class="home"></a></div>
                 <div class="nine columns"><h3 class="subheader white">Welcome, <%=currentUser.getName()+" "+currentUser.getSurname() %></h3></div>
             </div>
             <div class="row">
                 <div class="three columns">
                     <div class="panel large radius">
                         <ul class="side-nav">
-                            <li><a href="#" id="home"><h5>Home</h5></a></li>
+                            <li><a href="#" class="home"><h5>Home</h5></a><li>
                             <li class="divider"></li>
-                            <li id="myprojects"><h6>My Projects</h6></li>
-                            <li class="divider"></li>
-                            <li id="publicprojects"><h6>Public Projects</h6></li>
-                            <li class="divider"></li>
-                            <li><a href="#" class="" id="userSettings">Settings</a></li>
-                            <li><a href="#" class="" id="logout">Logout</a></li>
+                            <ul class="side-nav projects">
+                            </ul>
+                            <li><a href="#/settings" class="" id="userSettings">Settings</a></li>
+                            <li><a href="<%=base%>" class="" id="logout">Logout</a></li>
                         </ul>
                     </div>
                 </div>
@@ -59,7 +57,8 @@
     <script src="<%=base%>/javascripts/jquery.min.js"></script>
     <script src="<%=base%>/javascripts/jquery.textchange.min.js"></script>
     <script src="<%=base%>/javascripts/jquery.exists.js"></script>
+    <script src="<%=base%>/javascripts/jquery.address.min.js"></script>
     <script src="<%=base%>/javascripts/foundation.js"></script>
     <script src="<%=base%>/javascripts/util.jsp" type="text/javascript" language="JavaScript"></script>
-    <script src="<%=base%>/javascripts/dashboard.jsp?path=<%= request.getPathInfo() %>" type="text/javascript" language="JavaScript"></script>
+    <script src="<%=base%>/javascripts/dashboard.jsp" type="text/javascript" language="JavaScript"></script>
 </html>

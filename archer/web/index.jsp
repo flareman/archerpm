@@ -25,7 +25,7 @@
         <div class="row full-height etched"><div class="twelve columns">
             <div class="row">
                 <div id="header" class="twelve columns centered">
-                    <div class="row"><div class="four columns centered"><img id="logo" class="hidden" src="images/archer/archer_big.png" alt="Welcome to Archer"/></div></div>
+                    <div class="row"><div class="four columns centered"><img id="logo" class="hidden" src="<%=base%>/images/archer/archer_big.png" alt="Welcome to Archer"/></div></div>
                     <div class="row">
                         <div class="six columns centered"><h1 class="hidden" id="welcome">Welcome to Archer</h1></div>
                     </div>
