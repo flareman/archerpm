@@ -127,3 +127,7 @@ span.loader {
     text-decoration: line-through;
     color: #999;
 }
+
+li.right {
+    text-align: right;
+}

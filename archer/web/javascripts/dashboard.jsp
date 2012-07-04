@@ -255,14 +255,14 @@ var viewTask = function(taskID, allowBack) {
         content.append('<h5 class="subheader" id="projectnum">This task is part of the <a href="#/project/'+task.project+'" id="projectname"></a> project.</h5>');
         $('#projectname', content).address();
         content.append('<hr/><h4 class="subheader">Task Details</h4>');
-        content.append('<ul class="block-grid two-up" id="taskdetails"></ul>');
-        $('#taskdetails', content).append('<li>Start Date: '+task.startDate+'</li>');
-        $('#taskdetails', content).append('<li>Est. Duration: '+task.duration+'</li>');
+        content.append('<ul class="block-grid four-up" id="taskdetails"></ul>');
+        $('#taskdetails', content).append('<li class="right">Start:</li><li>'+task.startDate+'</li>');
+        $('#taskdetails', content).append('<li class="right">Duration (est.):</li><li>'+task.duration+' days</li>');
         if (task.completed) {
-            $('#taskdetails', content).append('<li>Completion Date: '+task.endDate+'</li>');
-            $('#taskdetails', content).append('<li>Real Duration: '+task.realDuration+'</li>');
+            $('#taskdetails', content).append('<li class="right">Ended at:</li><li>'+task.endDate+'</li>');
+            $('#taskdetails', content).append('<li class="right">Duration (real):</li><li>'+task.realDuration+' days</li>');
         } else {
-            $('#taskdetails', content).append('<li>Est. Completion Date: '+task.approxEndDate+'</li>');
+            $('#taskdetails', content).append('<li class="right">Ends at (est.):</li><li>'+task.approxEndDate+'</li>');
         }
         content.append('<hr/><h4 class="subheader">Discussion</h4>');
         var stepsRemaining = 2;
