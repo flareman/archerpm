@@ -16,10 +16,13 @@ var preparePage = function() {
     loadSideNav();
     $.address.strict(false);
     $.address.init(function(event) {
-    }).internalChange(function(event) {
-        handleAddressEvent(event, true);
-    }).externalChange(function(event) {
-        handleAddressEvent(event, false);
+    }).change(function(event) {
+        if (typeof window.isInternal != 'undefined')
+            handleAddressEvent(event, true);
+        else {
+            window.isInternal = true;
+            handleAddressEvent(event, false);
+        }
     });
 }
 
