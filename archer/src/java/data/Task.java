@@ -1,6 +1,7 @@
 package data;
 
 import java.sql.Date;
+import java.util.Calendar;
 
 public class Task {
     public enum Priority {
@@ -33,9 +34,12 @@ public class Task {
         this.duration = dur;
         this.id = ID;
         this.completed = cmpl;
-        this.approxEndDate = new Date(this.startDate.getTime()+(24*60*60*this.duration));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(this.startDate);
+        calendar.add(Calendar.DATE, this.duration);
+        this.approxEndDate = new Date(calendar.getTimeInMillis());
         if (this.endDate != null)
-            this.realDuration = (int)((this.endDate.getTime()-this.startDate.getTime())/(24*60*60));
+            this.realDuration = (int)((this.endDate.getTime()-this.startDate.getTime())/(24*60*60*1000));
         else this.realDuration = 0;
     }
     
