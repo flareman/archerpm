@@ -59,6 +59,10 @@
         <servlet-name>PerformLogin</servlet-name>
         <servlet-class>system.PerformLogin</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>DeleteEntity</servlet-name>
+        <servlet-class>system.DeleteEntity</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>checkUsername</servlet-name>
         <url-pattern>/check</url-pattern>
@@ -98,6 +102,10 @@
     <servlet-mapping>
         <servlet-name>DashboardMain</servlet-name>
         <url-pattern>/dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DeleteEntity</servlet-name>
+        <url-pattern>/delete</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
