@@ -153,7 +153,8 @@ public class UpdateEntity extends HttpServlet {
                             out.println("{\"error\":\"Visitors are second-rate users. Scram!\"}");
                             validUpdate = false;
                         } else {
-                            Comment comment = new Gson().fromJson(request.getParameter("value"), Comment.class);
+                            String input = request.getParameter("value");
+                            Comment comment = new Gson().fromJson(input, Comment.class);
                             if (user.getStatus() == User.Status.PROJECT_MANAGER) {
                                 query = "SELECT DISTINCT username FROM Users, Projects, Tasks, Comments WHERE ";
                                 query += "Projects.manager = Users.username AND Tasks.projectID = Projects.projectID ";

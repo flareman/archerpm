@@ -67,6 +67,10 @@
         <servlet-name>UpdateEntity</servlet-name>
         <servlet-class>system.UpdateEntity</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>PerformCheck</servlet-name>
+        <servlet-class>system.PerformCheck</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>checkUsername</servlet-name>
         <url-pattern>/check</url-pattern>
@@ -114,6 +118,10 @@
     <servlet-mapping>
         <servlet-name>UpdateEntity</servlet-name>
         <url-pattern>/dashboard/update</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PerformCheck</servlet-name>
+        <url-pattern>/dashboard/check2</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

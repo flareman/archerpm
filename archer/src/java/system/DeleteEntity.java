@@ -79,21 +79,21 @@ public class DeleteEntity extends HttpServlet {
                             }
                         }
                     } else if (kind.equals("comment")) {
-                        if (user.getStatus() != User.Status.ADMINISTRATOR && user.getStatus() != User.Status.PROJECT_MANAGER) {
+                        if (user.getStatus() == User.Status.VISITOR || user.getStatus() == User.Status.UNDEFINED) {
                             validUpdate = false;
-                            out.println("{\"error\":\"Only administrators and the project manager can delete comments for this project.\"}");
+                            out.println("{\"error\":\"Visitors can't delete comments from tasks.\"}");
                         } else {
                             Integer commentID = Integer.parseInt(request.getParameter("value"));
                             if (user.getStatus() != User.Status.ADMINISTRATOR) {
                                 query = "SELECT DISTINCT Users.username FROM Users, Projects, Tasks, Comments WHERE Comments.commentID = ? AND Tasks.projectID = Projects.ProjectID AND";
-                                query  += " Comments.taskID = Tasks.taskID AND Projects.manager  = Users.username AND Users.username = ?";
+                                query  += " Comments.taskID = Tasks.taskID AND Users.username = ? AND (Projects.manager = Users.username OR Comments.username = Users.username)";
                                 stmt = conn.prepareStatement(query);
                                 stmt.setInt(1, commentID);
                                 stmt.setString(2, user.getUsername());
                                 ResultSet res = stmt.executeQuery();
                                 if (res.next()) stmt.close();
                                 else {
-                                    out.println("{\"error\":\"Only administrators and the project manager can delete comments of this project.\"}");
+                                    out.println("{\"error\":\"Only administrators, the project manager and the original posters can delete comments of this project.\"}");
                                     validUpdate = false;
                                 }
                             }

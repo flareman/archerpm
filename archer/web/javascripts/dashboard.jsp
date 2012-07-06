@@ -265,29 +265,65 @@ var viewTask = function(taskID, allowBack) {
             $('#taskdetails', content).append('<li class="right">Ends at (est.):</li><li>'+task.approxEndDate+'</li>');
         }
         content.append('<hr/><h4 class="subheader">Discussion</h4>');
-        var stepsRemaining = 2;
+        content.append($('<div id="comments"/>'));
+        $("#comments", content).html('Loading...');
         loadProject(function(project){
             $('#projectname', content).html(project.title);
-            if (--stepsRemaining == 0) {
-                $('#content').replaceWith(content);
-                $.address.title('Archer - Dashboard - '+task.title);
-            }
+            $('#content').replaceWith(content);
+            $.address.title('Archer - Dashboard - '+task.title);
         }, "project", task.project);
-        loadComments(function(data){
-            content.append($('<div id="comments"/>'));
-            $.each(data, function(i, comment) {
-                $("#comments", content).append($('<blockquote/>').html(comment.content+'<cite><a class="commenter" href="#/user/'+comment.username+'">'+comment.fullname+'</a> on '+comment.timestamp+'</cite>'));
-            });
-            $('a.commenter', content).address();
-            $("#comments", content).append('<form id="newcomment" action="#" method="post"><div class="row collapse"><div class="ten columns"><input type="text" name="content" placeholder="Type your comment here" id="content"/></div><div class="two columns"><input type="submit" class="postfix button" value="Post"/></div></div></form>');
-            if (--stepsRemaining == 0) {
-                $('#content').replaceWith(content);
-                $.address.title('Archer - Dashboard - '+task.title);
-            }
-        }, task.id);
+        loadComments(function(data){ refreshComments(data, content, task.id); }, task.id);
     }, "task", taskID);
 }
 
+var refreshComments = function(data, content, taskID) {
+    $("#comments", content).html('');
+    if (data.length > 5) {
+        var loadMore = $('<a class="button expand" href="#"/>').html('Load entire discussion').click(function(e){
+            e.preventDefault();
+            $(".comment", content).show();
+            $("#loadMore", content).hide();
+        });
+        $("#comments", content).append($('<div class="row" id="loadMore"/>').append($('<div class="twelve columns"/>').append(loadMore)));
+    }
+    $.each(data, function(i, comment) {
+        var newComment = $('<blockquote class="comment"/>').html(comment.content+'<cite><a class="commenter" href="#/user/'+comment.username+'">'+comment.fullname+'</a> on '+comment.timestamp+'<span class="managecomment"></span></cite>');
+        if (data.length - i > 5) newComment.hide();
+        $("#comments", content).append(newComment);
+        performCheck(function(approved){
+            if (!approved) return;
+            $('.managecomment', newComment).append(' - <a href="#" class="editcomment">Edit</a> - <a href="#" class="deletecomment">Delete</a>');
+            $('.editcomment', newComment).click(function(e){
+                e.preventDefault();
+                newComment.html('<div class="row collapse"><div class="ten columns"><input type="text" name="newContent" value="'+comment.content+'" class="newcontent"/></div><div class="two columns"><a href="#" class="postfix button do-edit-comment">Update</a></div></div>');
+                $('.do-edit-comment', newComment).click(function(e){
+                    e.preventDefault();
+                    comment.content = $('.newcontent', newComment).val();
+                    updateEntity(function() {
+                        loadComments(function(data){ refreshComments(data, content, taskID); }, taskID);
+                    }, "comment", JSON.stringify(comment, null, 2));
+                });
+            });
+            $('.deletecomment', newComment).click(function(e){
+                e.preventDefault();
+                if (confirm("Really delete?")) deleteEntity(function() {
+                    loadComments(function(data){ refreshComments(data, content, taskID); }, taskID);
+                }, "comment", comment.id);
+            });
+        }, "manager", "comment", comment.id);
+    });
+    $('a.commenter', content).address();
+    $("#comments", content).append('<form id="newcomment" action="#" method="post"><div class="row collapse"><div class="ten columns"><input type="text" name="content" placeholder="Type your comment here" id="commentcontent"/></div><div class="two columns"><input id="submitcomment" type="submit" class="postfix button" value="Post"/></div></div></form>');
+    $('#commentcontent').focus();
+    $('#newcomment', content).submit(function(e) {
+        e.preventDefault();
+        $('#submitcomment', content).addClass("disabled").attr("disabled", "disabled").attr("value", "Posting...");
+        $('#commentcontent', content).addClass("disabled").attr("disabled", "disabled");
+        postComment(function() {
+            loadComments(function(data){ refreshComments(data, content, taskID); }, taskID);
+        }, taskID, $('#commentcontent', content).val());
+    });
+}
 
 var viewLanding = function() {
     $.address.title('Archer - Dashboard');
@@ -390,6 +426,74 @@ var loadComments = function(implement, task) {
         if (data.hasOwnProperty("error"))
             $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
         else implement(data);
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+        $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
+    }
+    });
+}
+
+var postComment = function(implement, task, content) {
+    $.ajax({  
+    type: "POST",
+    url: "<%= response.encodeURL(base+"/dashboard/create") %>",
+    data: {"kind": "comment", "task": task, "content": content},
+    dataType: "json",
+    success: function(data) {
+        if (data.hasOwnProperty("error"))
+            $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
+        else implement(data);
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+        $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
+    }
+    });
+}
+
+var deleteEntity = function(implement, kind, value) {
+    $.ajax({  
+    type: "POST",
+    url: "<%= response.encodeURL(base+"/dashboard/delete") %>",
+    data: {"kind": kind, "value": value},
+    dataType: "json",
+    success: function(data) {
+        if (data.hasOwnProperty("error"))
+            $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
+        else implement(data);
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+        $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
+    }
+    });
+}
+
+var performCheck = function(implement, check, kind, value) {
+    $.ajax({  
+    type: "POST",
+    url: "<%= response.encodeURL(base+"/dashboard/check2") %>",
+    data: {"check": check, "kind": kind, "value": value},
+    dataType: "json",
+    success: function(data) {
+        if (data.hasOwnProperty("error"))
+            $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
+        else implement(data.result);
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+        $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
+    }
+    });
+}
+
+var updateEntity = function(implement, kind, value) {
+    $.ajax({  
+    type: "POST",
+    url: "<%= response.encodeURL(base+"/dashboard/update") %>",
+    data: {"kind": kind, "value": value},
+    dataType: "json",
+    success: function(data) {
+        if (data.hasOwnProperty("error"))
+            $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');
+        else implement(data.result);
     },
     error: function(xhr, ajaxOptions, thrownError) {
         $('#content').html('<div class="alert-box alert radius">'+data.error+'</div>');

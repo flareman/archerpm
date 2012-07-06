@@ -58,7 +58,7 @@ public class CreateEntity extends HttpServlet {
                             String username = user.getUsername();
                             Integer parentProject = Integer.parseInt(request.getParameter("project"));
                             query = "INSERT INTO Tasks (projectID,title,description,priority,completed,duration,beginsAt,endedAt)";
-                            query += " SELECT ?,?,?,?,?,?,?,? FROM Tasks";
+                            query += " SELECT DISTINCT ?,?,?,?,?,?,?,? FROM Tasks";
                             if(user.getStatus() == User.Status.PROJECT_MANAGER){
                                 query += " WHERE ? IN (SELECT manager FROM Projects WHERE projectID = ?) LIMIT 1";
                             }
@@ -79,27 +79,28 @@ public class CreateEntity extends HttpServlet {
                         }
                     } 
                     else if(kind.equals("comment")){
-                        if((user.getStatus() != User.Status.VISITOR || (user.getStatus() != User.Status.UNDEFINED) )){
+                        if((user.getStatus() == User.Status.VISITOR || (user.getStatus() == User.Status.UNDEFINED) )){
                             out.println("{\"error\":\"Visitors are not allows to post any comments.\"}");
                         }
                         else{
                             String username = user.getUsername();
                             Integer parentTask = Integer.parseInt(request.getParameter("task"));
                             query = "INSERT INTO Comments (content, timestamp, username, taskID)";
-                            query += " SELECT ?,NOW(),?,? From Comments";
+                            query += " SELECT DISTINCT ?,NOW(),?,? FROM Comments";
+                            if(user.getStatus() != User.Status.ADMINISTRATOR){
+                                query += " WHERE ? IN (SELECT username FROM TaskHasUsers WHERE taskID = ? AND username = ?) "
+                                        + "OR ? IN (SELECT Projects.manager FROM Projects, Tasks WHERE Tasks.projectID = Projects.projectID AND Tasks.taskID = ?) LIMIT 1";
+                            }
                             stmt = conn.prepareStatement(query);
                             stmt.setString(1, request.getParameter("content"));
                             stmt.setString(2, username);
                             stmt.setInt(3, parentTask);
                             if(user.getStatus() != User.Status.ADMINISTRATOR){
-                                query += " WHERE EXISTS (SELECT 1 FROM TaskHasUsers WHERE taskID = ? AND username = ?) "
-                                        + "OR ? IN (SELECT Projects.manager FROM Projects, Tasks WHERE Tasks.projectID = Projects.projectID AND Tasks.taskID = ?) LIMIT 1";
-                            }
-                            if(user.getStatus() != User.Status.ADMINISTRATOR){
-                                stmt.setInt(4,parentTask);
-                                stmt.setString(5,username);
+                                stmt.setString(4,username);
+                                stmt.setInt(5,parentTask);
                                 stmt.setString(6,username);
-                                stmt.setInt(7,parentTask);
+                                stmt.setString(7,username);
+                                stmt.setInt(8,parentTask);
                             }
                         }
                     }                    
