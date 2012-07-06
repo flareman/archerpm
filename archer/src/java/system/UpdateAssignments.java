@@ -1,5 +1,6 @@
 package system;
 
+import com.google.gson.Gson;
 import data.DBManager;
 import data.User;
 import java.io.IOException;
@@ -13,10 +14,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class DeleteEntity extends HttpServlet {
+public class UpdateAssignments extends HttpServlet {
     private DBManager manager;
     
-    @Override // THANK YOU CAPTAIN TROOPEROUS
+    @Override // THANK YOU OPTIMUS PRIME
     public void init() throws ServletException {this.manager = DBManager.getManager();}
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -33,74 +34,46 @@ public class DeleteEntity extends HttpServlet {
                 if (user != null) {
                     conn = this.manager.getConnection();
                     String kind = request.getParameter("kind");
+                    Integer value = Integer.parseInt(request.getParameter("value"));
+                    if (value < 0) throw new NumberFormatException();
+                    String[] usernames = new Gson().fromJson(request.getParameter("usernames"), String[].class);
                     if (kind.equals("project")) {
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
-                            out.println("{\"error\":\"Only administrators can delete projects\"}");
+                            out.println("{\"error\":\"Only administrators can update project \"Tibbers\"\"}");
                             validUpdate = false;
                         } else {
-                            Integer projectID = Integer.parseInt(request.getParameter("value"));
-                            query = "DELETE FROM Projects WHERE projectID = ?";
+                            query = "DELETE FROM ProjectHasUsers WHERE projectID = ?";
                             stmt = conn.prepareStatement(query);
-                            stmt.setInt(1, projectID);
-                        }
-                    } else if (kind.equals("user")) {
-                        if (user.getStatus() != User.Status.ADMINISTRATOR) {
-                            out.println("{\"error\":\"Only administrators can delete users\"}");
-                            validUpdate = false;
-                        } else {
-                            String username = request.getParameter("value");
-                            query = "DELETE FROM Users WHERE username = ?";
-                            stmt = conn.prepareStatement(query);
-                            stmt.setString(1, username);
+                            stmt.setInt(1, value);
+                            stmt.executeUpdate();
+                            stmt.close();
+                            query = "INSERT INTO ProjectHasUsers (projectID, username) VALUES (?, ?)";
                         }
                     } else if (kind.equals("task")) {
                         if (user.getStatus() != User.Status.ADMINISTRATOR && user.getStatus() != User.Status.PROJECT_MANAGER) {
+                            out.println("{\"error\":\"Only administrators and radioactive rodents can update project \"Twinkles\"\"}");
                             validUpdate = false;
-                            out.println("{\"error\":\"Only administrators and the project manager can delete tasks for this project.\"}");
                         } else {
-                            Integer taskID = Integer.parseInt(request.getParameter("value"));
-                            if (user.getStatus() != User.Status.ADMINISTRATOR) {
+                            if (user.getStatus() == User.Status.PROJECT_MANAGER) {
                                 query = "SELECT DISTINCT Users.username FROM Users, Projects, Tasks WHERE Tasks.taskID = ? AND Tasks.projectID = Projects.ProjectID AND";
                                 query  += " Projects.manager = Users.username AND Users.username = ?";
                                 stmt = conn.prepareStatement(query);
-                                stmt.setInt(1, taskID);
+                                stmt.setInt(1, value);
                                 stmt.setString(2, user.getUsername());
                                 ResultSet res = stmt.executeQuery();
                                 if (res.next()) stmt.close();
                                 else {
-                                    out.println("{\"error\":\"Only administrators and the manager of the project this task is a part of can delete this task.\"}");
+                                    out.println("{\"error\":\"Only administrators and the project manager can change the task assignments.\"}");
                                     validUpdate = false;
                                 }
                             }
                             if (validUpdate) {
-                                query = "DELETE FROM Tasks WHERE taskID = ?";
+                                query = "DELETE FROM TaskHasUsers WHERE taskID = ?";
                                 stmt = conn.prepareStatement(query);
-                                stmt.setInt(1, taskID);
-                            }
-                        }
-                    } else if (kind.equals("comment")) {
-                        if (user.getStatus() != User.Status.ADMINISTRATOR && user.getStatus() != User.Status.PROJECT_MANAGER) {
-                            validUpdate = false;
-                            out.println("{\"error\":\"Only administrators and the project manager can delete comments for this project.\"}");
-                        } else {
-                            Integer commentID = Integer.parseInt(request.getParameter("value"));
-                            if (user.getStatus() != User.Status.ADMINISTRATOR) {
-                                query = "SELECT DISTINCT Users.username FROM Users, Projects, Tasks, Comments WHERE Comments.commentID = ? AND Tasks.projectID = Projects.ProjectID AND";
-                                query  += " Comments.taskID = Tasks.taskID AND Projects.manager  = Users.username AND Users.username = ?";
-                                stmt = conn.prepareStatement(query);
-                                stmt.setInt(1, commentID);
-                                stmt.setString(2, user.getUsername());
-                                ResultSet res = stmt.executeQuery();
-                                if (res.next()) stmt.close();
-                                else {
-                                    out.println("{\"error\":\"Only administrators and the project manager can delete comments of this project.\"}");
-                                    validUpdate = false;
-                                }
-                            }
-                            if (validUpdate) {
-                                query = "DELETE FROM Comments WHERE commentID = ?";
-                                stmt = conn.prepareStatement(query);
-                                stmt.setInt(1, commentID);
+                                stmt.setInt(1, value);
+                                stmt.executeUpdate();
+                                stmt.close();
+                                query = "INSERT INTO TaskHasUsers (taskID, username) VALUES (?, ?)";
                             }
                         }
                     } else {
@@ -108,10 +81,13 @@ public class DeleteEntity extends HttpServlet {
                         out.println("{\"error\":\"Wrong argument\"}");
                     }
                     if (validUpdate) {
-                        int affected = stmt.executeUpdate();
-                        if (affected == 0)
-                            out.println("{\"error\":\"Something went wrong&trade;.\"}");
-                        else out.println("{}");
+                        stmt = conn.prepareStatement(query);
+                        stmt.setInt(1, value);
+                        for (String s: usernames) {
+                            stmt.setString(2, s);
+                            stmt.executeUpdate();
+                        }
+                        out.println("{}");
                     }
                 } else out.println("{\"error\":\"Requesting user not logged in\"}");
             }
@@ -119,7 +95,7 @@ public class DeleteEntity extends HttpServlet {
                 out.println("{\"error\":\"An error occured while contacting the database. Contact your supervisor for details.\"}");
                 log("SQL error at DeleteEntity", SQLe);
             } catch (Exception e) {
-                out.println("{\"error\":\"An error occured while attempting to perform the deletion. Please contact your supervisor.\"}");
+                out.println("{\"error\":\"An error occured while attempting to perform the update. Please contact your supervisor.\"}");
                 e.printStackTrace();
             }
             finally {

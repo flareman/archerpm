@@ -1,14 +1,13 @@
 package data;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
 public class Comment {
     private Integer id;
     private String content;
     private String username;
     private String fullname;
-    private Date timestamp;
+    private Timestamp timestamp;
     private Integer task;
     
     public Comment(Integer ID, String cnt, String user, String full, Timestamp stamp, Integer taskID) {
@@ -25,5 +24,5 @@ public class Comment {
     public String getContent() { return this.content; }
     public String getUsername() { return this.username; }
     public String getFullname() { return this.fullname; }
-    public Date getTimestamp() { return this.timestamp; }
+    public Timestamp getTimestamp() { return this.timestamp; }
 }
