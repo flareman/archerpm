@@ -45,10 +45,10 @@ public class PerformCheck extends HttpServlet {
                                     query = "SELECT DISTINCT Users.username FROM Users, Projects WHERE Projects.projectID = ? AND";
                                     query  += " Projects.manager = Users.username AND Users.username = ?";
                                 } else if (kind.equals("task")) {
-                                    query = "SELECT DISTINCT Users.username FROM Users, Projects, Tasks WHERE Tasks.taskID = ? AND Tasks.projectID = Projects.ProjectID AND";
-                                    query  += " Projects.manager = Users.username AND Users.username = ?";
+                                    query = "SELECT DISTINCT Users.username FROM Users, Projects, Tasks, TaskHasUsers WHERE Tasks.taskID = ? AND Tasks.projectID = Projects.projectID AND";
+                                    query  += " TaskHasUsers.taskID = Tasks.taskID AND (TaskHasUsers.username = Users.username OR Projects.manager = Users.username) AND Users.username = ?";
                                 } else if (kind.equals("comment")) {
-                                    query = "SELECT DISTINCT Users.username FROM Users, Projects, Tasks, Comments WHERE Comments.commentID = ? AND Tasks.projectID = Projects.ProjectID AND";
+                                    query = "SELECT DISTINCT Users.username FROM Users, Projects, Tasks, Comments WHERE Comments.commentID = ? AND Tasks.projectID = Projects.projectID AND";
                                     query  += " Comments.taskID = Tasks.taskID AND Users.username = ? AND (Projects.manager = Users.username OR Comments.username = Users.username)";
                                 } else {
                                     out.println("{\"result\":false}");

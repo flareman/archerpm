@@ -115,7 +115,7 @@ public class GetProjects extends HttpServlet {
                                 Project requestedProject = new Project(results.getInt("projectID"), results.getString("title"), results.getString("description"),
                                         results.getString("manager"), results.getDate("beginsAt"), results.getInt("totalDuration"), results.getBoolean("isPublic"));
                                 out.println(new Gson().toJson(requestedProject, requestedProject.getClass()));
-                            } else out.println("{\"error\":\"Requested project not found\"}");
+                            } else out.println("{\"error\":\"Project does not exist\"}");
                         } else {
                             while (results.next())
                                 projects.add(new Project(results.getInt("projectID"), results.getString("title"), results.getString("description"),

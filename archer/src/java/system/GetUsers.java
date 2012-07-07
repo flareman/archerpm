@@ -44,6 +44,14 @@ public class GetUsers extends HttpServlet {
                             out.println("{\"error\":\"Requesting user is not an administrator\"}");
                             validRequest = false;
                         }
+                    } else if (kind.equals("managers")) {
+                        if (user.getStatus() == User.Status.ADMINISTRATOR) {
+                            query = "SELECT DISTINCT username, name, surname, email, description AS status FROM Users, Status WHERE Status.statusID = Users.status AND Status.description = 'Project Manager' ORDER BY surname ASC";
+                            stmt = conn.prepareStatement(query);
+                        } else {
+                            out.println("{\"error\":\"Requesting user is not an administrator\"}");
+                            validRequest = false;
+                        }
                     } else if (kind.equals("task")) {
                         Integer task = Integer.parseInt(request.getParameter("value"));
                         query = "SELECT Projects.isPublic, Projects.projectID FROM Projects, Tasks WHERE Tasks.projectID = Projects.projectID AND Tasks.taskID = ?";

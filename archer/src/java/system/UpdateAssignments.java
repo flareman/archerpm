@@ -39,7 +39,7 @@ public class UpdateAssignments extends HttpServlet {
                     String[] usernames = new Gson().fromJson(request.getParameter("usernames"), String[].class);
                     if (kind.equals("project")) {
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
-                            out.println("{\"error\":\"Only administrators can update project \"Tibbers\"\"}");
+                            out.println("{\"error\":\"Only administrators can update tibbers.\"}");
                             validUpdate = false;
                         } else {
                             query = "DELETE FROM ProjectHasUsers WHERE projectID = ?";

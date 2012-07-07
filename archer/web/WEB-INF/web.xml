@@ -71,6 +71,10 @@
         <servlet-name>PerformCheck</servlet-name>
         <servlet-class>system.PerformCheck</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>UpdateAssignments</servlet-name>
+        <servlet-class>system.UpdateAssignments</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>checkUsername</servlet-name>
         <url-pattern>/check</url-pattern>
@@ -122,6 +126,10 @@
     <servlet-mapping>
         <servlet-name>PerformCheck</servlet-name>
         <url-pattern>/dashboard/check2</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdateAssignments</servlet-name>
+        <url-pattern>/dashboard/assign</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

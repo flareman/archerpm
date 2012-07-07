@@ -38,7 +38,8 @@
                             <li class="divider"></li>
                             <ul class="side-nav projects">
                             </ul>
-                            <li><a href="#/user/<%= currentUser.getUsername() %>" class="" id="userSettings">My Profile</a></li>
+                            <%= (currentUser.getStatus() == User.Status.ADMINISTRATOR)?"<li><a href=\"#/allusers\" id=\"userSettings\">All Users</a></li>":"" %>
+                            <li><a href="#/user/<%= currentUser.getUsername() %>" id="userSettings">My Profile</a></li>
                             <li><a href="<%=base%>" class="" id="logout">Logout</a></li>
                         </ul>
                     </div>

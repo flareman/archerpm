@@ -90,7 +90,7 @@ public class GetTasks extends HttpServlet {
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
                             query += " AND (";
                             query += "Tasks.projectID IN (SELECT projectID FROM Projects WHERE isPublic = 1)";
-                            query += " OR Tasks.projectID IN (SELECT Projects.projectID FROM Projects, ProjectHasUsers WHERE ProjectHasUsers.username = ?)";
+                            query += " OR Tasks.projectID IN (SELECT Projects.projectID FROM Projects, ProjectHasUsers WHERE Projects.projectID = ProjectHasUsers.projectID AND ProjectHasUsers.username = ?)";
                             query += " OR Tasks.projectID IN (SELECT projectID FROM Projects WHERE manager = ?)";
                             query += ")";
                         }
@@ -112,12 +112,12 @@ public class GetTasks extends HttpServlet {
                                 Task result = new Task(results.getInt("taskID"), results.getString("title"), results.getString("description"), results.getInt("projectID"), results.getString("priority"),
                                         results.getDate("beginsAt"), results.getDate("endedAt"), results.getInt("duration"), results.getBoolean("completed"));
                                 out.println(new Gson().toJson(result, result.getClass()));
-                            } else out.println("{}");
+                            } else out.println("{\"error\":\"Requested task not found\"}");
                         } else {
                             while (results.next())
                                 tasks.add(new Task(results.getInt("taskID"), results.getString("title"), results.getString("description"), results.getInt("projectID"), results.getString("priority"),
                                         results.getDate("beginsAt"), results.getDate("endedAt"), results.getInt("duration"), results.getBoolean("completed")));
-                            if (tasks.isEmpty()) out.println("{\"error\":\"Requested task not found\"}");
+                            if (tasks.isEmpty()) out.println("{}");
                             else {
                                 Gson gson = new Gson();
                                 String output = gson.toJson(tasks, tasks.getClass());

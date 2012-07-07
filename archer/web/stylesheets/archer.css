@@ -131,3 +131,18 @@ span.loader {
 li.right {
     text-align: right;
 }
+
+ul.block-grid li.active {
+    font-weight: bold;
+    position: relative;
+    background-color: #caecf5;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+    border-radius: 3px;
+}
+
+div.borderleft {
+    border-left: 1px solid #CCC;
+}

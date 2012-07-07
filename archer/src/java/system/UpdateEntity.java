@@ -46,50 +46,66 @@ public class UpdateEntity extends HttpServlet {
                             query = "UPDATE Projects SET ";
                             query += "title = ?, ";
                             query += "description = ?, ";
-                            query += "manager = ?, ";
-                            query += "beginsAt = ?, ";
-                            query += "totalDuration = ?, ";
+//                            query += "beginsAt = ?, ";
+//                            query += "totalDuration = ?, ";
                             query += "isPublic = ? ";
                             query += "WHERE projectID = ?";
                             stmt = conn.prepareStatement(query);
                             stmt.setString(1, project.getTitle());
                             stmt.setString(2, project.getDesc());
-                            stmt.setString(3, project.getManager());
-                            stmt.setDate(4, project.getStartDate());
-                            stmt.setInt(5, project.getDuration());
-                            stmt.setBoolean(6, project.isPublic());
-                            stmt.setInt(7, project.getID());
+//                            stmt.setDate(4, project.getStartDate());
+//                            stmt.setInt(5, project.getDuration());
+                            stmt.setBoolean(3, project.isPublic());
+                            stmt.setInt(4, project.getID());
                         }
                     } else if (kind.equals("user")) {
+                        String password[] = new Gson().fromJson(request.getParameter("optional"), String[].class);
                         if (user.getStatus() != User.Status.ADMINISTRATOR) {
+                            Boolean changePass = false;
+                            if (password[1] != null && !password[1].equals("") && password[1].length() >= 6)
+                                changePass = true;
+                            if (changePass && !password[2].equals(password[1])) {
+                                out.println("{\"error\":\"The new password was not typed properly both times. Please, go back and try again.\"}");
+                                validUpdate = false;
+                            }
                             User editUser = new Gson().fromJson(request.getParameter("value"), User.class);
                             query = "UPDATE Users SET ";
                             query += "name = ?, ";
                             query += "surname = ?, ";
                             query += "email = ? ";
+                            if (changePass)
+                                query += ", password = SHA1(CONCAT(salt,?)) ";
+                            query += "WHERE username = ?";
+                            if (changePass)
+                                query += " AND password = SHA1(CONCAT(salt,?))";
+                            stmt = conn.prepareStatement(query);
+                            stmt.setString(1, editUser.getName());
+                            stmt.setString(2, editUser.getSurname());
+                            stmt.setString(3, editUser.getEmail());
+                            if (changePass) {
+                                stmt.setString(4, password[1]);
+                                stmt.setString(5, user.getUsername());
+                                stmt.setString(6, password[0]);
+                            } else
+                                stmt.setString(4, user.getUsername());
+                        } else {
+                            User editUser = new Gson().fromJson(request.getParameter("value"), User.class);
+                            if (!password[1].equals(password[0])) {
+                                out.println("{\"error\":\"The new password was not typed properly both times. Please, go back and try again.\"}");
+                                validUpdate = false;
+                            }
+                            query = "UPDATE Users SET ";
+                            query += "name = ?, ";
+                            query += "surname = ?, ";
+                            query += "email = ?, ";
+                            query += "password = SHA1(CONCAT(salt,?)), ";
+                            query += "status = ? ";
                             query += "WHERE username = ?";
                             stmt = conn.prepareStatement(query);
                             stmt.setString(1, editUser.getName());
                             stmt.setString(2, editUser.getSurname());
                             stmt.setString(3, editUser.getEmail());
-                            stmt.setString(4, user.getUsername());
-                        } else {
-                            User editUser = new Gson().fromJson(request.getParameter("value"), User.class);
-                            String oldPassword = request.getParameter("oldpass");
-                            String newPassword = request.getParameter("newpass");
-                            query = "UPDATE Users SET ";
-                            query += "name = ?, ";
-                            query += "surname = ?, ";
-                            query += "email = ?, ";
-                            query += "password = ?, ";
-                            query += "status = ? ";
-                            query += "WHERE username = ? ";
-                            query += "AND password = SHA1(CONCAT(salt,?))";
-                            stmt = conn.prepareStatement(query);
-                            stmt.setString(1, editUser.getName());
-                            stmt.setString(2, editUser.getSurname());
-                            stmt.setString(3, editUser.getEmail());
-                            stmt.setString(4, newPassword);
+                            stmt.setString(4, password[0]);
                             switch (editUser.getStatus()) {
                                 case ADMINISTRATOR: stmt.setInt(5, 1); break;
                                 case PROJECT_MANAGER: stmt.setInt(5, 2); break;
@@ -98,21 +114,20 @@ public class UpdateEntity extends HttpServlet {
                                 default: validUpdate = false; out.println("{\"error\":\"Unrecognized user status.\"}"); break;
                             }
                             stmt.setString(6, editUser.getUsername());
-                            stmt.setString(7, oldPassword);
                         }
                     } else if (kind.equals("task")) {
-                        if (user.getStatus() != User.Status.ADMINISTRATOR && user.getStatus() != User.Status.PROJECT_MANAGER) {
-                            out.println("{\"error\":\"Only administrators and the project manager can update this task's details.\"}");
+                        if (user.getStatus() == User.Status.VISITOR) {
+                            out.println("{\"error\":\"Visitors can't update this task's details.\"}");
                             validUpdate = false;
                         } else {
                             Task task = new Gson().fromJson(request.getParameter("value"), Task.class);
-                            if (user.getStatus() == User.Status.PROJECT_MANAGER) {
-                                query = "SELECT DISTINCT username FROM Users, Projects, Tasks WHERE ";
-                                query += "Projects.manager = Users.username AND Tasks.projectID = Projects.projectID ";
-                                query += "AND Users.username = ? AND Tasks.taskID = ?";
+                            if (user.getStatus() != User.Status.ADMINISTRATOR) {
+                                query = "SELECT DISTINCT Users.username FROM Users, Projects, Tasks, TaskHasUsers WHERE";
+                                query += " Tasks.projectID = Projects.projectID AND TaskHasUsers.taskID = Tasks.taskID";
+                                query += " AND (Projects.manager = Users.username OR TaskHasUsers.username = Users.username) AND Users.username = ? AND Tasks.taskID = ?";
                                 stmt = conn.prepareStatement(query);
                                 stmt.setString(1, user.getUsername());
-                                stmt.setInt(1, task.getID());
+                                stmt.setInt(2, task.getID());
                                 ResultSet res = stmt.executeQuery();
                                 if (res.next()) stmt.close();
                                 else {
@@ -129,7 +144,7 @@ public class UpdateEntity extends HttpServlet {
                                 query += "endedAt = ?, ";
                                 query += "duration = ?, ";
                                 query += "completed = ? ";
-                                query += "WHERE projectID = ?";
+                                query += "WHERE taskID = ?";
                                 stmt = conn.prepareStatement(query);
                                 stmt.setString(1, task.getTitle());
                                 stmt.setString(2, task.getDesc());
@@ -156,7 +171,7 @@ public class UpdateEntity extends HttpServlet {
                             String input = request.getParameter("value");
                             Comment comment = new Gson().fromJson(input, Comment.class);
                             if (user.getStatus() == User.Status.PROJECT_MANAGER) {
-                                query = "SELECT DISTINCT username FROM Users, Projects, Tasks, Comments WHERE ";
+                                query = "SELECT DISTINCT Users.username FROM Users, Projects, Tasks, Comments WHERE ";
                                 query += "Projects.manager = Users.username AND Tasks.projectID = Projects.projectID ";
                                 query += "AND Comments.taskID = Tasks.taskID AND Users.username = ? AND Tasks.taskID = ?";
                                 stmt = conn.prepareStatement(query);
