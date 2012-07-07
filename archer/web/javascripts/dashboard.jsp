@@ -843,6 +843,7 @@ var viewLanding = function() {
                     break;
             }
         });
+        if (typeof data.length == 'undefined') $('#mytasks', content).append($('<li/>').html('None'));
         loadProject(function(data2) {
             $.each(data2, function(i, project) {
                 if (project.manager != "<%= currentUser.getUsername() %>") return;
@@ -853,6 +854,7 @@ var viewLanding = function() {
                 else
                     plink.parent().append('<span class="label radius">Private</span>');
             });
+            if (typeof data2.length == 'undefined') $('#myprojects', content).append($('<li/>').html('None'));
             $('#content').replaceWith(content);
         }, "user", "<%= currentUser.getUsername() %>");
     }, "user", "<%= currentUser.getUsername() %>");
